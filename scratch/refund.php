@@ -3,9 +3,9 @@ header('Content-Type: application/json');
 
 // Database connection configuration
 $host = 'localhost:3306';
-$dbname = 'tgbrolin_scratch';
-$username = 'tgbrolin_scratch'; // Replace with your database username
-$password = 'tgbrolin_scratch'; // Replace with your database password
+$dbname = 'ads_webapp';
+$username = 'root'; // Replace with your database username
+$password = 'root'; // Replace with your database password
 
 try {
     // Establish PDO connection

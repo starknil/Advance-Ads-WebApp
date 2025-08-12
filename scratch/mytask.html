@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Tasks - Scratch Rewards</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Ubuntu:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500;1,700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://clients.tgbro.link/shop/api/nav-footer.js"></script>
+    <style>
+        :root {
+            --bg-color: #121212;
+            --primary-color: #7c3aed;
+            --primary-light: rgba(124, 58, 237, 0.1);
+            --text-color: #e0e0e0;
+            --text-secondary: #a0a0a0;
+            --success-color: #10b981;
+            --error-color: #ef4444;
+            --card-bg: rgba(124, 58, 237, 0.15);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Ubuntu', sans-serif;
+            background: var(--bg-color);
+            color: var(--text-color);
+            min-height: 100vh;
+            padding-top: 10px;
+            padding-bottom: 70px;
+            display: flex;
+            user-select: none;
+            flex-direction: column;
+            position: relative;
+            overflow-x: hidden;
+            overflow-y: auto;
+        }
+
+        .app-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            padding-top: 50px;
+            padding-bottom: 20px;
+            background: rgba(18, 18, 18, 0.8);
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            border-bottom: 1px solid rgba(124, 58, 237, 0.3);
+        }
+
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 16px;
+        }
+
+        .header-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text-color);
+            margin-right: 8px;
+        }
+
+        .verified-icon {
+            width: 20px;
+            height: 20px;
+        }
+
+        .app-content {
+            padding: 24px;
+            width: 100%;
+            max-width: 500px;
+            margin: 0 auto;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 24px;
+            margin-top: 60px;
+        }
+
+        .balance-section {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 20px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(124, 58, 237, 0.2);
+        }
+
+        .deposit-section {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 20px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(124, 58, 237, 0.2);
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: var(--text-color);
+            border-bottom: 1px solid rgba(124, 58, 237, 0.3);
+            padding-bottom: 10px;
+        }
+
+        .balance-amount {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--success-color);
+            margin-bottom: 16px;
+            text-align: center;
+        }
+
+        .deposit-address-container {
+            display: flex;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+
+        .deposit-address {
+            flex-grow: 1;
+            color: var(--text-secondary);
+            font-size: 14px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .copy-btn {
+            background: var(--primary-color);
+            border: none;
+            padding: 8px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-left: 10px;
+            color: white;
+            transition: background 0.3s ease;
+        }
+
+        .copy-btn:hover {
+            background: #6b21a8;
+        }
+
+        .deposit-info {
+            font-size: 12px;
+            color: var(--text-secondary);
+            text-align: left;
+            margin-top: 8px;
+            line-height: 1.5;
+        }
+
+        .tasks-section {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 20px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(124, 58, 237, 0.2);
+        }
+
+        .tasks-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .add-task-btn {
+            background: var(--primary-color);
+            border: none;
+            padding: 8px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            color: white;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: background 0.3s ease;
+        }
+
+        .add-task-btn:hover {
+            background: #6b21a8;
+        }
+
+        .task-list {
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .task-item {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            border-bottom: 1px solid rgba(124, 58, 237, 0.2);
+            position: relative;
+        }
+
+        .task-item:last-child {
+            border-bottom: none;
+        }
+
+        .task-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            object-fit: cover;
+            margin-right: 12px;
+        }
+
+        .task-details {
+            flex-grow: 1;
+        }
+
+        .task-name {
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+
+        .task-stats {
+            display: flex;
+            gap: 12px;
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .task-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .task-action-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 16px;
+            transition: color 0.3s ease;
+        }
+
+        .task-action-btn.edit:hover {
+            color: var(--primary-color);
+        }
+
+        .task-action-btn.delete:hover {
+            color: var(--error-color);
+        }
+
+        .no-tasks {
+            text-align: center;
+            color: var(--text-secondary);
+            padding: 20px 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .swal2-popup {
+            background: var(--bg-color) !important;
+            color: var(--text-color) !important;
+            border: 1px solid rgba(124, 58, 237, 0.2) !important;
+            backdrop-filter: blur(10px) !important;
+            width: 90vw !important;
+            max-width: 400px !important;
+        }
+
+        .swal2-input, .swal2-select, .swal2-textarea {
+            background: rgba(255, 255, 255, 0.05) !important;
+            border: 1px solid rgba(124, 58, 237, 0.3) !important;
+            color: var(--text-color) !important;
+        }
+
+        .swal2-input:focus, .swal2-select:focus, .swal2-textarea:focus {
+            border-color: var(--primary-color) !important;
+            box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.3) !important;
+        }
+
+        .swal2-label {
+            color: var(--text-color) !important;
+        }
+
+        @media (max-width: 480px) {
+            .app-content {
+                padding: 16px;
+                padding-top: calc(80px + env(safe-area-inset-top));
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="app-header">
+        <div class="header-content">
+            <h1 class="header-title">SHIBAdEarner</h1>
+            <img src="https://upload.wikimedia.org/wikipedia/commons/e/e4/Twitter_Verified_Badge.svg" alt="Verified" class="verified-icon" id="verified-icon">
+        </div>
+    </header>
+
+    <div class="app-content">
+        <div class="balance-section">
+            <h2 class="section-title">Task Balance</h2>
+            <div class="balance-amount" id="task-balance">$0.00</div>
+        </div>
+
+        <div class="deposit-section">
+            <h2 class="section-title">Deposit Address</h2>
+            <div class="deposit-address-container">
+                <span class="deposit-address" id="deposit-address">Loading deposit address...</span>
+                <button class="copy-btn" id="copy-address-btn">
+                    <i class="fas fa-copy"></i>
+                </button>
+            </div>
+            <div class="deposit-info">
+                <p><strong>Deposit Information:</strong></p>
+                <p>• Only USDT (BEP20) deposits accepted</p>
+                <p>• Minimum deposit: $1</p>
+                <p>• Balance is added instantly after deposit</p>
+                <p>• Use this address to fund your task balance</p>
+                <p>• You will get 200 members per $1</p>
+            </div>
+        </div>
+
+        <div class="tasks-section">
+            <div class="tasks-header">
+                <h2 class="section-title">My Tasks</h2>
+                <button class="add-task-btn" id="add-task-btn">
+                    <i class="fas fa-plus"></i> Add
+                </button>
+            </div>
+            <div class="task-list" id="task-list">
+                <div class="no-tasks" id="no-tasks">
+                    <p>No tasks yet. Add your first task!</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize Telegram WebApp
+        const tg = window.Telegram.WebApp;
+        tg.backgroundColor = '#121212';
+        tg.headerColor = '#121212';
+        tg.expand();
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set verified icon
+            document.getElementById('verified-icon').src = 'https://upload.wikimedia.org/wikipedia/commons/e/e4/Twitter_Verified_Badge.svg';
+
+            // Extract user data from Telegram
+            const user = tg.initDataUnsafe.user || {};
+            const userId = user.id || 0;
+            const initData = tg.initData;
+
+            let tasksData = [];
+
+            fetchTasks();
+
+            async function fetchTasks() {
+                try {
+                    const response = await fetch('api/mytask.php', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            user_id: userId,
+                            init_data: initData
+                        })
+                    });
+
+                    const data = await response.json();
+
+                    if (data.ok) {
+                        // Update balance and deposit address
+                        const balance = data.result[0]?.task_balance || "0.00";
+                        const depositAddress = data.result[0]?.deposit_address || "No address available";
+                        
+                        document.getElementById('task-balance').textContent = `$${balance}`;
+                        document.getElementById('deposit-address').textContent = depositAddress;
+
+                        // Update tasks list
+                        tasksData = data.result[0]?.tasks || [];
+                        renderTasks(tasksData);
+
+                        // Setup copy button for deposit address
+                        document.getElementById('copy-address-btn').addEventListener('click', () => {
+                            copyToClipboard(depositAddress, "Deposit address copied!");
+                        });
+                    } else {
+                        showErrorMessage(data.message || 'Failed to load tasks data.');
+                    }
+                } catch (error) {
+                    console.error('Error fetching tasks:', error);
+                    showErrorMessage('Failed to connect to the server. Please try again.');
+                }
+            }
+
+            function renderTasks(tasks) {
+                const taskList = document.getElementById('task-list');
+                const noTasks = document.getElementById('no-tasks');
+                
+                // Clear existing tasks
+                taskList.innerHTML = '';
+                
+                // Filter out tasks that are completed or don't have limit/completed values
+                const filteredTasks = tasks.filter(task => {
+                    if (!task.limit || !task.completed) return true;
+                    return parseInt(task.completed) < parseInt(task.limit);
+                });
+
+                if (filteredTasks.length === 0) {
+                    noTasks.style.display = 'flex';
+                    taskList.appendChild(noTasks);
+                } else {
+                    noTasks.style.display = 'none';
+                    
+                    filteredTasks.forEach(task => {
+                        const taskItem = document.createElement('div');
+                        taskItem.className = 'task-item';
+                        
+                        taskItem.innerHTML = `
+                            <img src="${task.icon}" alt="Task Icon" class="task-icon" onerror="this.src='https://via.placeholder.com/40'">
+                            <div class="task-details">
+                                <div class="task-name">${task.name}</div>
+                                <div class="task-stats">
+                                    <span>Completed: ${task.completed || 0}</span>
+                                    <span>Limit: ${task.limit || '∞'}</span>
+                                </div>
+                            </div>
+                            <div class="task-actions">
+                                <button class="task-action-btn edit" data-task-id="${task.task_id}">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="task-action-btn delete" data-task-id="${task.task_id}">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        `;
+                        
+                        taskList.appendChild(taskItem);
+                    });
+
+                    // Add event listeners for edit and delete buttons
+                    document.querySelectorAll('.task-action-btn.edit').forEach(btn => {
+                        btn.addEventListener('click', (e) => {
+                            const taskId = e.currentTarget.getAttribute('data-task-id');
+                            showEditTaskForm(taskId);
+                        });
+                    });
+
+                    document.querySelectorAll('.task-action-btn.delete').forEach(btn => {
+                        btn.addEventListener('click', (e) => {
+                            const taskId = e.currentTarget.getAttribute('data-task-id');
+                            confirmDeleteTask(taskId);
+                        });
+                    });
+                }
+            }
+
+            // Add Task Button
+            document.getElementById('add-task-btn').addEventListener('click', showAddTaskForm);
+
+            function showAddTaskForm() {
+                Swal.fire({
+                    title: 'Add New Task',
+                    html: `
+                        <input type="text" id="task-name" class="swal2-input" placeholder="Task Name" required>
+                        <input type="url" id="task-url" class="swal2-input" placeholder="Task URL" required>
+                        <select id="task-type" class="swal2-select">
+                            <option value="telegram_chat">Telegram Chat</option>
+                            <option value="telegram_bot">Telegram Bot</option>
+                            <option value="others">Others</option>
+                        </select>
+                        <input type="number" id="task-amount" class="swal2-input" placeholder="Amount (Minimum $1)" min="1" step="0.1" required>
+                        <input type="url" id="task-icon" class="swal2-input" placeholder="Icon URL (imgbb.com)">
+                    `,
+                    confirmButtonText: 'Add Task',
+                    confirmButtonColor: 'var(--primary-color)',
+                    showCancelButton: true,
+                    background: 'var(--bg-color)',
+                    color: 'var(--text-color)',
+                    preConfirm: () => {
+                        const amount = parseFloat(document.getElementById('task-amount').value);
+                        if (isNaN(amount)) {
+                            Swal.showValidationMessage('Please enter a valid amount');
+                            return false;
+                        }
+                        if (amount < 1) {
+                            Swal.showValidationMessage('Minimum amount is $1');
+                            return false;
+                        }
+                        
+                        return {
+                            name: document.getElementById('task-name').value,
+                            url: document.getElementById('task-url').value,
+                            type: document.getElementById('task-type').value,
+                            amount: amount,
+                            icon: document.getElementById('task-icon').value || 'https://via.placeholder.com/40'
+                        };
+                    }
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        addTask(result.value);
+                    }
+                });
+            }
+
+            function showEditTaskForm(taskId) {
+                const task = tasksData.find(t => t.task_id === taskId);
+                if (!task) return;
+
+                Swal.fire({
+                    title: 'Edit Task',
+                    html: `
+                        <input type="text" id="edit-task-name" class="swal2-input" placeholder="Task Name" value="${task.name}" required>
+                        <input type="url" id="edit-task-url" class="swal2-input" placeholder="Task URL" value="${task.url}" required>
+                        <input type="url" id="edit-task-icon" class="swal2-input" placeholder="Icon URL" value="${task.icon}">
+                    `,
+                    confirmButtonText: 'Update Task',
+                    confirmButtonColor: 'var(--primary-color)',
+                    showCancelButton: true,
+                    background: 'var(--bg-color)',
+                    color: 'var(--text-color)',
+                    preConfirm: () => {
+                        return {
+                            task_id: taskId,
+                            name: document.getElementById('edit-task-name').value,
+                            url: document.getElementById('edit-task-url').value,
+                            icon: document.getElementById('edit-task-icon').value || task.icon
+                        };
+                    }
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        editTask(result.value);
+                    }
+                });
+            }
+
+            function confirmDeleteTask(taskId) {
+                Swal.fire({
+                    title: 'Delete Task?',
+                    text: "You won't be able to revert this!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: 'var(--error-color)',
+                    cancelButtonColor: 'var(--text-secondary)',
+                    confirmButtonText: 'Yes, delete it!',
+                    background: 'var(--bg-color)',
+                    color: 'var(--text-color)'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        deleteTask(taskId);
+                    }
+                });
+            }
+
+            async function addTask(taskData) {
+                try {
+                    const response = await fetch('api/tasks.php', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            user_id: userId,
+                            init_data: initData,
+                            action: "add",
+                            payload: {
+                                amount: taskData.amount,
+                                name: taskData.name,
+                                url: taskData.url,
+                                type: taskData.type,
+                                icon: taskData.icon
+                            }
+                        })
+                    });
+
+                    const data = await response.json();
+
+                    if (data.ok) {
+                        showSuccessMessage(data.message || 'Task added successfully!');
+                        location.reload();
+                    } else {
+                        showErrorMessage(data.message || 'Failed to add task.');
+                    }
+                } catch (error) {
+                    console.error('Error adding task:', error);
+                    showErrorMessage('Failed to connect to the server. Please try again.');
+                }
+            }
+
+            async function editTask(taskData) {
+                try {
+                    const response = await fetch('api/tasks.php', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            user_id: userId,
+                            init_data: initData,
+                            action: "edit",
+                            payload: {
+                                task_id: taskData.task_id,
+                                name: taskData.name,
+                                url: taskData.url,
+                                icon: taskData.icon
+                            }
+                        })
+                    });
+
+                    const data = await response.json();
+
+                    if (data.ok) {
+                        showSuccessMessage(data.message || 'Task updated successfully!');
+                        location.reload();
+                    } else {
+                        showErrorMessage(data.message || 'Failed to update task.');
+                    }
+                } catch (error) {
+                    console.error('Error updating task:', error);
+                    showErrorMessage('Failed to connect to the server. Please try again.');
+                }
+            }
+
+            async function deleteTask(taskId) {
+                try {
+                    const response = await fetch('api/tasks.php', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            user_id: userId,
+                            init_data: initData,
+                            action: "remove",
+                            payload: {
+                                task_id: taskId
+                            }
+                        })
+                    });
+
+                    const data = await response.json();
+
+                    if (data.ok) {
+                        showSuccessMessage(data.message || 'Task deleted successfully!');
+                        location.reload();
+                    } else {
+                        showErrorMessage(data.message || 'Failed to delete task.');
+                    }
+                } catch (error) {
+                    console.error('Error deleting task:', error);
+                    showErrorMessage('Failed to connect to the server. Please try again.');
+                }
+            }
+
+            function showSuccessMessage(message) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success',
+                    text: message,
+                    confirmButtonColor: 'var(--primary-color)',
+                    background: 'var(--bg-color)',
+                    color: 'var(--text-color)'
+                });
+            }
+
+            function showErrorMessage(message) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: message,
+                    confirmButtonColor: 'var(--primary-color)',
+                    background: 'var(--bg-color)',
+                    color: 'var(--text-color)'
+                });
+            }
+
+            function copyToClipboard(text, successMessage) {
+                const tempInput = document.createElement('input');
+                tempInput.value = text;
+                document.body.appendChild(tempInput);
+                tempInput.select();
+                
+                try {
+                    document.execCommand('copy');
+                    Swal.fire({
+                        text: successMessage,
+                        showConfirmButton: false,
+                        background: 'var(--bg-color)',
+                        color: 'var(--text-color)',
+                        backdrop: 'rgba(0,0,0,0.8)',
+                        timer: 2000
+                    });
+                } catch (err) {
+                    navigator.clipboard.writeText(text)
+                        .then(() => {
+                            Swal.fire({
+                                text: successMessage,
+                                showConfirmButton: false,
+                                background: 'var(--bg-color)',
+                                color: 'var(--text-color)',
+                                backdrop: 'rgba(0,0,0,0.8)',
+                                timer: 2000
+                            });
+                        })
+                        .catch(err => {
+                            console.error('Copy failed:', err);
+                            showErrorMessage('Unable to copy. Please try again.');
+                        });
+                }
+                
+                document.body.removeChild(tempInput);
+            }
+        });
+
+        function redirect(url, vibrate) {
+            if (vibrate && navigator.vibrate) navigator.vibrate(7);
+            window.location.href = url;
+        }
+
+        navFooter.add(
+            {
+                theme: 'dark',
+                selectedColor: '#7c3aed'
+            },
+            [
+                {
+                    name: "TASK",
+                    icon: "fa-tasks",
+                    onClick: (e) => redirect("index.html", true)
+                },
+                {
+                    name: "CARDS",
+                    icon: "fa-credit-card",
+                    onClick: (e) => redirect("cards.html", true)
+                },
+                {
+                    name: "INVITE",
+                    icon: "fa-user-plus",
+                    onClick: (e) => redirect("refers.html", true)
+                },
+                {
+                    name: "WITHDRAW",
+                    icon: "fa-money-bill",
+                    onClick: (e) => redirect("withdraw.html", true)
+                },
+                {
+                    name: "MY TASK",
+                    icon: "fa-server",
+                    selected: true,
+                    onClick: (e) => redirect("mytask.html", true)
+                }
+            ]
+        );
+    </script>
+</body>
+</html>

@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings Management Admin Panel</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://clients.tgbro.link/shop/api/nav-footer.js"></script>
+    <style>
+        body {
+            background-color: #f4f6f9;
+            padding-top: 20px;
+            padding-bottom: 80px;
+            font-family: 'Inter', sans-serif;
+        }
+        .card-container {
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+        .card-header {
+            background-color: #f8f9fa;
+            border-bottom: 1px solid #e9ecef;
+            padding: 20px;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+            letter-spacing: 0.5px;
+        }
+        .card-body {
+            padding: 20px;
+        }
+        .table-container {
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+        }
+        .table {
+            margin-bottom: 0;
+        }
+        .table th {
+            background-color: #f8f9fa;
+            border-top: none;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 0.5px;
+        }
+        .form-container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .btn-action {
+            padding: 5px 10px;
+            font-size: 0.875rem;
+        }
+        .table-hover tbody tr:hover {
+            background-color: #f8f9fa;
+        }
+        .reward-badge {
+            font-size: 0.75rem;
+            padding: 4px 8px;
+            border-radius: 12px;
+        }
+        .settings-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+        }
+        .stat-card h3 {
+            font-size: 2rem;
+            margin-bottom: 5px;
+        }
+        .stat-card p {
+            margin: 0;
+            opacity: 0.9;
+        }
+        @media (max-width: 768px) {
+            .table-responsive {
+                border: none;
+            }
+            .btn-action {
+                padding: 4px 8px;
+                font-size: 0.8rem;
+            }
+            .settings-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="row mb-4 align-items-center">
+            <div class="col-12 col-md-6">
+                <h1 class="fs-3 fw-bold">Settings Management Admin Panel</h1>
+            </div>
+            <div class="col-12 col-md-6 text-md-end">
+                <button class="btn btn-success me-2" id="refreshBtn">
+                    <i class="fas fa-sync-alt me-2"></i>Refresh
+                </button>
+                <button class="btn btn-primary" id="addWithdrawMethodBtn">
+                    <i class="fas fa-plus me-2"></i>Add Withdrawal Method
+                </button>
+            </div>
+        </div>
+
+        <!-- Settings Cards -->
+        <div class="settings-grid">
+            <!-- General Settings Card -->
+            <div class="card-container">
+                <div class="card-header">
+                    <i class="fas fa-cog me-2"></i>General Settings
+                </div>
+                <div class="card-body">
+                    <form id="generalSettingsForm">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="currency" class="form-label">Currency</label>
+                                <input type="text" class="form-control" id="currency" placeholder="INR">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="botUsername" class="form-label">Bot Username</label>
+                                <input type="text" class="form-control" id="botUsername" placeholder="@diamond_card_bot">
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-2"></i>Update Settings
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Reward Settings Card -->
+            <div class="card-container">
+                <div class="card-header">
+                    <i class="fas fa-gift me-2"></i>Reward Settings
+                </div>
+                <div class="card-body">
+                    <form id="rewardSettingsForm">
+                        <div class="mb-3">
+                            <label for="silverReward" class="form-label">Silver Reward</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-medal text-secondary"></i></span>
+                                <input type="number" class="form-control" id="silverReward" min="0" step="0.01">
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="goldReward" class="form-label">Gold Reward</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-medal text-warning"></i></span>
+                                <input type="number" class="form-control" id="goldReward" min="0" step="0.01">
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="diamondReward" class="form-label">Diamond Reward</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-gem text-info"></i></span>
+                                <input type="number" class="form-control" id="diamondReward" min="0" step="0.01">
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-2"></i>Update Rewards
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Withdrawal Rules Card -->
+            <div class="card-container">
+                <div class="card-header">
+                    <i class="fas fa-money-bill-wave me-2"></i>Withdrawal Rules
+                </div>
+                <div class="card-body">
+                    <form id="withdrawRulesForm">
+                        <div class="mb-3">
+                            <label for="minWithdraw" class="form-label">Minimum Withdrawal</label>
+                            <div class="input-group">
+                                <span class="input-group-text" id="minCurrencySymbol">₹</span>
+                                <input type="number" class="form-control" id="minWithdraw" min="0" step="0.01">
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="maxWithdraw" class="form-label">Maximum Withdrawal</label>
+                            <div class="input-group">
+                                <span class="input-group-text" id="maxCurrencySymbol">₹</span>
+                                <input type="number" class="form-control" id="maxWithdraw" min="0" step="0.01">
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="minInvite" class="form-label">Minimum Invites Required</label>
+                            <input type="number" class="form-control" id="minInvite" min="0">
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-2"></i>Update Rules
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Withdrawal Methods Table -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="table-container">
+                    <div class="card-header">
+                        <i class="fas fa-credit-card me-2"></i>Withdrawal Methods
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead>
+                                <tr>
+                                    <th scope="col" style="width: 10%">#</th>
+                                    <th scope="col" style="width: 40%">Method Name</th>
+                                    <th scope="col" style="width: 35%">Field Name</th>
+                                    <th scope="col" style="width: 15%">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="withdrawMethodsContainer">
+                                <tr>
+                                    <td colspan="4" class="text-center">
+                                        <div class="spinner-border text-primary" role="status">
+                                            <span class="visually-hidden">Loading...</span>
+                                        </div>
+                                        <p class="mb-0 mt-2">Loading withdrawal methods...</p>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add/Edit Withdrawal Method Modal -->
+    <div class="modal fade" id="withdrawMethodModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="withdrawModalTitle">Add Withdrawal Method</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="withdrawMethodForm">
+                        <input type="hidden" id="withdrawMethodId">
+                        <div class="mb-3">
+                            <label for="methodName" class="form-label">Method Name</label>
+                            <input type="text" class="form-control" id="methodName" placeholder="e.g., PayPal, Bank Transfer" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="fieldName" class="form-label">Field Name</label>
+                            <input type="text" class="form-control" id="fieldName" placeholder="e.g., email_address, account_number" required>
+                            <div class="form-text">This will be the field users need to fill when withdrawing</div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="saveWithdrawMethodBtn">Save Method</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Pin Modal -->
+    <div class="modal fade" id="adminPinModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-warning">
+                    <h5 class="modal-title">Admin Authentication Required</h5>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="adminPinInput" class="form-label">Enter Admin PIN</label>
+                        <input type="password" class="form-control" id="adminPinInput" placeholder="Enter admin pin">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" id="submitAdminPin">Submit</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Global variables
+        const API_URL = 'settings.php';
+        let adminPin = localStorage.getItem('admin_pin') || '';
+        let currentSettings = {};
+        let withdrawMethods = [];
+        let withdrawRules = {};
+        
+        // Modals
+        let withdrawMethodModal = new bootstrap.Modal(document.getElementById('withdrawMethodModal'));
+        let adminPinModal = new bootstrap.Modal(document.getElementById('adminPinModal'));
+        
+        // Initialize the admin panel
+        document.addEventListener('DOMContentLoaded', function() {
+            checkAdminPin();
+            
+            // Event listeners
+            document.getElementById('refreshBtn').addEventListener('click', loadAllSettings);
+            document.getElementById('addWithdrawMethodBtn').addEventListener('click', showAddWithdrawMethodModal);
+            document.getElementById('saveWithdrawMethodBtn').addEventListener('click', saveWithdrawMethod);
+            document.getElementById('submitAdminPin').addEventListener('click', submitAdminPin);
+            
+            // Form submissions
+            document.getElementById('generalSettingsForm').addEventListener('submit', updateGeneralSettings);
+            document.getElementById('rewardSettingsForm').addEventListener('submit', updateRewardSettings);
+            document.getElementById('withdrawRulesForm').addEventListener('submit', updateWithdrawRules);
+            
+            // Load settings if we have admin pin
+            if (adminPin) {
+                loadAllSettings();
+            }
+        });
+        
+        // Check admin pin and show modal if needed
+        function checkAdminPin() {
+            if (!adminPin) {
+                adminPinModal.show();
+            }
+        }
+        
+        // Submit admin pin
+        function submitAdminPin() {
+            const pin = document.getElementById('adminPinInput').value.trim();
+            if (!pin) {
+                showError('Please enter admin pin');
+                return;
+            }
+            
+            console.log(pin);
+            // Test the pin by making a simple request
+            fetch(API_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ admin_pin: pin, action: 'update_settings', settings: {} })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success' || data.status === 'error' && !data.message.includes('Invalid admin pin')) {
+                    adminPin = pin;
+                    localStorage.setItem('admin_pin', pin);
+                    adminPinModal.hide();
+                    loadAllSettings();
+                } else {
+                    showError('Invalid admin pin');
+                }
+            })
+            .catch(error => {
+                console.log(error);
+                showError('Error verifying admin pin: ' + error.message);
+            });
+        }
+        
+        // Load all settings
+        function loadAllSettings() {
+            showLoading();
+            
+            fetch(API_URL)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        currentSettings = data.data.settings;
+                        withdrawMethods = data.data.withdraw_methods || [];
+                        withdrawRules = data.data.withdraw_rules;
+                        
+                        populateSettingsForms();
+                        renderWithdrawMethods();
+                        updateCurrencySymbols();
+                    } else {
+                        showError(data.message || 'Failed to load settings');
+                    }
+                })
+                .catch(error => {
+                    showError('Error loading settings: ' + error.message);
+                });
+        }
+        
+        // Populate settings forms
+        function populateSettingsForms() {
+            // General settings
+            document.getElementById('currency').value = currentSettings.currency || '';
+            document.getElementById('botUsername').value = currentSettings.bot_username || '';
+            
+            // Reward settings
+            document.getElementById('silverReward').value = currentSettings.silver_reward || '';
+            document.getElementById('goldReward').value = currentSettings.gold_reward || '';
+            document.getElementById('diamondReward').value = currentSettings.diamond_reward || '';
+            
+            // Withdrawal rules
+            document.getElementById('minWithdraw').value = withdrawRules.min_withdraw || '';
+            document.getElementById('maxWithdraw').value = withdrawRules.max_withdraw || '';
+            document.getElementById('minInvite').value = withdrawRules.min_invite || '';
+        }
+        
+        // Update currency symbols
+        function updateCurrencySymbols() {
+            const currency = currentSettings.currency || 'INR';
+            const symbol = getCurrencySymbol(currency);
+            document.getElementById('minCurrencySymbol').textContent = symbol;
+            document.getElementById('maxCurrencySymbol').textContent = symbol;
+        }
+        
+        // Get currency symbol
+        function getCurrencySymbol(currency) {
+            const symbols = {
+                'INR': '₹',
+                'USD': '$',
+                'EUR': '€',
+                'GBP': '£',
+                'JPY': '¥'
+            };
+            return symbols[currency] || currency;
+        }
+        
+        // Update general settings
+        function updateGeneralSettings(e) {
+            e.preventDefault();
+            
+            const settings = {
+                currency: document.getElementById('currency').value.trim(),
+                bot_username: document.getElementById('botUsername').value.trim()
+            };
+            
+            if (!settings.currency || !settings.bot_username) {
+                showError('Please fill all fields');
+                return;
+            }
+            
+            updateSettings(settings, 'General settings updated successfully');
+        }
+        
+        // Update reward settings
+        function updateRewardSettings(e) {
+            e.preventDefault();
+            
+            const settings = {
+                silver_reward: parseFloat(document.getElementById('silverReward').value) || 0,
+                gold_reward: parseFloat(document.getElementById('goldReward').value) || 0,
+                diamond_reward: parseFloat(document.getElementById('diamondReward').value) || 0
+            };
+            
+            updateSettings(settings, 'Reward settings updated successfully');
+        }
+        
+        // Update withdraw rules
+        function updateWithdrawRules(e) {
+            e.preventDefault();
+            
+            const rules = {
+                min_withdraw: parseFloat(document.getElementById('minWithdraw').value) || 0,
+                max_withdraw: parseFloat(document.getElementById('maxWithdraw').value) || 0,
+                min_invite: parseInt(document.getElementById('minInvite').value) || 0
+            };
+            
+            if (rules.min_withdraw >= rules.max_withdraw) {
+                showError('Minimum withdrawal must be less than maximum withdrawal');
+                return;
+            }
+            
+            fetch(API_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    admin_pin: adminPin,
+                    action: 'update_withdraw_rules',
+                    rules: rules
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    showSuccess('Withdrawal rules updated successfully');
+                    loadAllSettings();
+                } else {
+                    showError(data.message || 'Failed to update withdrawal rules');
+                    checkAdminPinError(data.message);
+                }
+            })
+            .catch(error => {
+                showError('Error: ' + error.message);
+            });
+        }
+        
+        // Update settings helper
+        function updateSettings(settings, successMessage) {
+            fetch(API_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    admin_pin: adminPin,
+                    action: 'update_settings',
+                    settings: settings
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    showSuccess(successMessage);
+                    loadAllSettings();
+                } else {
+                    showError(data.message || 'Failed to update settings');
+                    checkAdminPinError(data.message);
+                }
+            })
+            .catch(error => {
+                showError('Error: ' + error.message);
+            });
+        }
+        
+        // Render withdrawal methods
+        function renderWithdrawMethods() {
+            const container = document.getElementById('withdrawMethodsContainer');
+            
+            if (withdrawMethods.length === 0) {
+                container.innerHTML = `
+                    <tr>
+                        <td colspan="4" class="text-center">
+                            <div class="alert alert-info mb-0">No withdrawal methods found</div>
+                        </td>
+                    </tr>`;
+                return;
+            }
+            
+            let html = '';
+            withdrawMethods.forEach((method, index) => {
+                html += `
+                    <tr>
+                        <td>${index + 1}</td>
+                        <td>${method.method_name}</td>
+                        <td><code>${method.field_name}</code></td>
+                        <td>
+                            <button class="btn btn-outline-primary btn-action edit-method" data-id="${method.id}">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn btn-outline-danger btn-action delete-method" data-id="${method.id}">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            container.innerHTML = html;
+            
+            // Add event listeners
+            document.querySelectorAll('.edit-method').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const methodId = this.getAttribute('data-id');
+                    showEditWithdrawMethodModal(methodId);
+                });
+            });
+            
+            document.querySelectorAll('.delete-method').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const methodId = this.getAttribute('data-id');
+                    confirmDeleteWithdrawMethod(methodId);
+                });
+            });
+        }
+        
+        // Show add withdrawal method modal
+        function showAddWithdrawMethodModal() {
+            document.getElementById('withdrawModalTitle').textContent = 'Add Withdrawal Method';
+            document.getElementById('withdrawMethodForm').reset();
+            document.getElementById('withdrawMethodId').value = '';
+            withdrawMethodModal.show();
+        }
+        
+        // Show edit withdrawal method modal
+        function showEditWithdrawMethodModal(methodId) {
+            const method = withdrawMethods.find(m => m.id == methodId);
+            if (!method) return;
+            
+            document.getElementById('withdrawModalTitle').textContent = 'Edit Withdrawal Method';
+            document.getElementById('withdrawMethodId').value = method.id;
+            document.getElementById('methodName').value = method.method_name;
+            document.getElementById('fieldName').value = method.field_name;
+            
+            withdrawMethodModal.show();
+        }
+        
+        // Save withdrawal method
+        function saveWithdrawMethod() {
+            const methodId = document.getElementById('withdrawMethodId').value;
+            const isEdit = !!methodId;
+            
+            const methodData = {
+                method_name: document.getElementById('methodName').value.trim(),
+                field_name: document.getElementById('fieldName').value.trim()
+            };
+            
+            if (!methodData.method_name || !methodData.field_name) {
+                showError('Please fill all fields');
+                return;
+            }
+            
+            const payload = {
+                admin_pin: adminPin,
+                action: isEdit ? 'edit_withdraw_method' : 'add_withdraw_method',
+                ...methodData
+            };
+            
+            if (isEdit) {
+                payload.id = methodId;
+            }
+            
+            fetch(API_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    showSuccess(data.message);
+                    withdrawMethodModal.hide();
+                    loadAllSettings();
+                } else {
+                    showError(data.message || 'Failed to save withdrawal method');
+                    checkAdminPinError(data.message);
+                }
+            })
+            .catch(error => {
+                showError('Error: ' + error.message);
+            });
+        }
+        
+        // Confirm delete withdrawal method
+        function confirmDeleteWithdrawMethod(methodId) {
+            const method = withdrawMethods.find(m => m.id == methodId);
+            if (!method) return;
+            
+            Swal.fire({
+                title: 'Delete Withdrawal Method?',
+                html: `Are you sure you want to delete <strong>${method.method_name}</strong>?`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                confirmButtonText: 'Delete',
+                cancelButtonText: 'Cancel'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    deleteWithdrawMethod(methodId);
+                }
+            });
+        }
+        
+        // Delete withdrawal method
+        function deleteWithdrawMethod(methodId) {
+            fetch(API_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    admin_pin: adminPin,
+                    action: 'remove_withdraw_method',
+                    id: methodId
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    showSuccess(data.message);
+                    loadAllSettings();
+                } else {
+                    showError(data.message || 'Failed to delete withdrawal method');
+                    checkAdminPinError(data.message);
+                }
+            })
+            .catch(error => {
+                showError('Error: ' + error.message);
+            });
+        }
+        
+        // Helper functions
+        function showLoading() {
+            document.getElementById('withdrawMethodsContainer').innerHTML = `
+                <tr>
+                    <td colspan="4" class="text-center">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="mb-0 mt-2">Loading...</p>
+                    </td>
+                </tr>
+            `;
+        }
+        
+        function showSuccess(message) {
+            Swal.fire({
+                icon: 'success',
+                title: 'Success',
+                text: message,
+                timer: 2000,
+                showConfirmButton: false
+            });
+        }
+        
+        function showError(message) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: message
+            });
+        }
+        
+        function checkAdminPinError(message) {
+            if (message && message.includes('pin')) {
+                localStorage.removeItem('admin_pin');
+                adminPin = '';
+                checkAdminPin();
+            }
+        }
+        
+        function redirect(url, vibrate) {
+            if (vibrate && navigator.vibrate) navigator.vibrate(7);
+            window.location.href = url;
+        }
+        
+        // Navigation
+        navFooter.add(
+            {
+                theme: 'light',
+                selectedColor: 'blue'
+            },
+            [
+                {
+                    name: "TASK",
+                    icon: "fa-tasks",
+                    onClick: (e) => redirect("index.html", true)
+                },
+                {
+                    name: "SETTINGS",
+                    icon: "fa-gear",
+                    selected: true,
+                    onClick: (e) => redirect("cards.html", true)
+                },
+                {
+                    name: "BONUS",
+                    icon: "fa-user-plus",
+                    onClick: (e) => redirect("rewards.html", true)
+                },
+                {
+                    name: "WITHDRAWS",
+                    icon: "fa-money-bill",
+                    onClick: (e) => redirect("withdraw.html", true)
+                },
+                {
+                    name: "USERS",
+                    icon: "fa-users",
+                    onClick: (e) => redirect("users.html", true)
+                }
+            ]
+        );
+    </script>
+</body>
+</html>

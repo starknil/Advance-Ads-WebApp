@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gift Code Management</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- SweetAlert2 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #f8f9fa; }
+        .container { max-width: 800px; margin-top: 20px; }
+        .table th, .table td { vertical-align: middle; }
+        .action-btn { cursor: pointer; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2 class="text-center mb-4"><i class="fas fa-gift me-2"></i>Gift Code Management</h2>
+
+        <!-- Button to Trigger Create Modal -->
+        <button class="btn btn-primary mb-4" data-bs-toggle="modal" data-bs-target="#giftCodeModal" onclick="resetModal('create')">
+            <i class="fas fa-plus me-2"></i>Add Gift Code
+        </button>
+
+        <!-- Table for Displaying Gift Codes -->
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Existing Gift Codes</h5>
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Gift Code</th>
+                            <th>Prize</th>
+                            <th>Max Users</th>
+                            <th>Claimed</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="giftCodeTable"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for Create/Edit -->
+    <div class="modal fade" id="giftCodeModal" tabindex="-1" aria-labelledby="modalTitle" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalTitle">Add Gift Code</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="giftCodeForm">
+                        <div class="mb-3">
+                            <label for="giftCode" class="form-label">Gift Code</label>
+                            <input type="text" class="form-control" id="giftCode" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="prize" class="form-label">Prize Amount</label>
+                            <input type="number" step="0.01" class="form-control" id="prize" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="users" class="form-label">Max Users</label>
+                            <input type="number" class="form-control" id="users" required>
+                        </div>
+                        <input type="hidden" id="action" value="create">
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><i class="fas fa-times me-2"></i>Close</button>
+                    <button type="button" class="btn btn-primary" onclick="submitForm()"><i class="fas fa-save me-2"></i>Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- SweetAlert2 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        const apiUrl = 'https://wenepay.cyou/scratch/admin/gift.php';
+        let adminPassword = new URLSearchParams(window.location.search).get('admin_password') || '';
+
+        // Prompt for admin password if not provided
+        async function promptAdminPassword() {
+            while (!adminPassword) {
+                const { value: password } = await Swal.fire({
+                    title: 'Enter Admin Password',
+                    input: 'password',
+                    inputPlaceholder: 'Admin Password',
+                    showCancelButton: false,
+                    allowOutsideClick: false,
+                    inputValidator: (value) => !value && 'Password is required!'
+                });
+                adminPassword = password;
+                if (adminPassword && !(await validateAdminPassword(adminPassword))) {
+                    Swal.fire('Error', 'Invalid admin password', 'error');
+                    adminPassword = '';
+                }
+            }
+        }
+
+        // Validate admin password via API
+        async function validateAdminPassword(password) {
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'get', admin_password: password })
+                });
+                const data = await response.json();
+                return data.ok;
+            } catch {
+                return false;
+            }
+        }
+
+        // Fetch and display gift codes
+        async function fetchGiftCodes() {
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'get', admin_password: adminPassword })
+                });
+                const data = await response.json();
+                if (data.ok) {
+                    document.getElementById('giftCodeTable').innerHTML = '';
+                    data.result.forEach(code => {
+                        const row = `
+                            <tr>
+                                <td>${code.gift_code}</td>
+                                <td>${code.prize}</td>
+                                <td>${code.users}</td>
+                                <td>${code.claimed}</td>
+                                <td>
+                                    <i class="fas fa-edit action-btn text-primary me-2" data-bs-toggle="modal" data-bs-target="#giftCodeModal" onclick="editGiftCode('${code.gift_code}', ${code.prize}, ${code.users})"></i>
+                                    <i class="fas fa-trash action-btn text-danger" onclick="deleteGiftCode('${code.gift_code}')"></i>
+                                </td>
+                            </tr>`;
+                        document.getElementById('giftCodeTable').innerHTML += row;
+                    });
+                } else {
+                    Swal.fire('Error', data.message, 'error');
+                    if (data.message === 'Invalid admin password') {
+                        adminPassword = '';
+                        await promptAdminPassword();
+                        fetchGiftCodes();
+                    }
+                }
+            } catch (error) {
+                Swal.fire('Error', 'Failed to fetch gift codes', 'error');
+            }
+        }
+
+        // Form submission for create/edit
+        async function submitForm() {
+            const action = document.getElementById('action').value;
+            const payload = {
+                action: action,
+                admin_password: adminPassword,
+                gift_code: document.getElementById('giftCode').value,
+                prize: parseFloat(document.getElementById('prize').value),
+                users: parseInt(document.getElementById('users').value)
+            };
+
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const data = await response.json();
+                Swal.fire(data.ok ? 'Success' : 'Error', data.message, data.ok ? 'success' : 'error');
+                if (data.ok) {
+                    document.getElementById('giftCodeForm').reset();
+                    document.getElementById('action').value = 'create';
+                    document.getElementById('modalTitle').textContent = 'Add Gift Code';
+                    document.getElementById('giftCode').disabled = false;
+                    bootstrap.Modal.getInstance(document.getElementById('giftCodeModal')).hide();
+                    fetchGiftCodes();
+                } else if (data.message === 'Invalid admin password') {
+                    adminPassword = '';
+                    await promptAdminPassword();
+                    submitForm();
+                }
+            } catch (error) {
+                Swal.fire('Error', 'Failed to process request', 'error');
+            }
+        }
+
+        // Reset modal for create
+        function resetModal(action) {
+            document.getElementById('giftCodeForm').reset();
+            document.getElementById('action').value = action;
+            document.getElementById('modalTitle').textContent = 'Add Gift Code';
+            document.getElementById('giftCode').disabled = false;
+        }
+
+        // Edit gift code
+        function editGiftCode(giftCode, prize, users) {
+            document.getElementById('giftCode').value = giftCode;
+            document.getElementById('prize').value = prize;
+            document.getElementById('users').value = users;
+            document.getElementById('action').value = 'edit';
+            document.getElementById('modalTitle').textContent = 'Edit Gift Code';
+            document.getElementById('giftCode').disabled = true;
+        }
+
+        // Delete gift code
+        async function deleteGiftCode(giftCode) {
+            const result = await Swal.fire({
+                title: 'Are you sure?',
+                text: `Delete gift code ${giftCode}?`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, delete it!'
+            });
+            if (result.isConfirmed) {
+                try {
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            action: 'delete',
+                            admin_password: adminPassword,
+                            gift_code: giftCode
+                        })
+                    });
+                    const data = await response.json();
+                    Swal.fire(data.ok ? 'Success' : 'Error', data.message, data.ok ? 'success' : 'error');
+                    if (data.ok) {
+                        fetchGiftCodes();
+                    } else if (data.message === 'Invalid admin password') {
+                        adminPassword = '';
+                        await promptAdminPassword();
+                        deleteGiftCode(giftCode);
+                    }
+                } catch (error) {
+                    Swal.fire('Error', 'Failed to delete gift code', 'error');
+                }
+            }
+        }
+
+        // Initialize
+        async function init() {
+            if (!adminPassword) await promptAdminPassword();
+            fetchGiftCodes();
+        }
+        init();
+    </script>
+</body>
+</html>

@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Management Admin Panel</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://clients.tgbro.link/shop/api/nav-footer.js"></script>
+    <!-- Add Google Fonts for Noto Sans and Noto Color Emoji -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,400;0,700;1,400;1,700&family=Noto+Color+Emoji&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f0f2f5;
+            padding-top: 20px;
+            padding-bottom: 100px;
+            font-family: 'Noto Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Color Emoji', 'Segoe UI Emoji', sans-serif;
+            color: #1a1a2e;
+        }
+        .container {
+            max-width: 1400px;
+            padding-left: 12px;
+            padding-right: 12px;
+        }
+        .header {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            gap: 10px;
+        }
+        .header h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #1a1a2e;
+            margin: 0;
+        }
+        .total-users {
+            font-size: 1rem;
+            font-weight: 500;
+            color: #6c757d;
+            background-color: #e9ecef;
+            padding: 8px 16px;
+            border-radius: 20px;
+        }
+        .table-container {
+            background-color: white;
+            border-radius: 16px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        .table {
+            margin-bottom: 0;
+        }
+        .table th {
+            background-color: #ffffff;
+            border-top: none;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            letter-spacing: 0.5px;
+            color: #6c757d;
+            padding: 12px 8px;
+            cursor: pointer;
+            user-select: none;
+            transition: background-color 0.2s ease;
+            white-space: nowrap;
+        }
+        .table th:hover {
+            background-color: #f1f3f5;
+        }
+        .sort-icon {
+            margin-left: 4px;
+            font-size: 0.7rem;
+            color: #adb5bd;
+            transition: color 0.2s ease;
+        }
+        .sort-icon.active {
+            color: #0d6efd;
+        }
+        .badge {
+            font-size: 0.75rem;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-weight: 500;
+        }
+        .btn-delete {
+            color: #dc3545;
+            transition: color 0.2s ease;
+            font-size: 1rem;
+            padding: 6px;
+        }
+        .btn-delete:hover {
+            color: #b02a37;
+        }
+        .table-hover tbody tr:hover {
+            background-color: #f8f9fa;
+        }
+        .search-container {
+            padding: 12px;
+            background-color: #f8f9fa;
+            border-bottom: 1px solid #e9ecef;
+        }
+        .search-container .form-control {
+            border-radius: 8px;
+            border: 1px solid #ced4da;
+            padding: 10px;
+            font-size: 0.9rem;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+        .search-container .form-control:focus {
+            border-color: #0d6efd;
+            box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+        }
+        td, th {
+            font-family: 'Noto Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Color Emoji', 'Segoe UI Emoji', sans-serif;
+            overflow-wrap: break-word;
+            word-break: break-all;
+            padding: 12px 8px;
+        }
+        /* Ensure truncated names fit */
+        .name-column {
+            max-width: 150px; /* Prevent overly wide names */
+        }
+        @media (max-width: 992px) {
+            .header h1 {
+                font-size: 1.5rem;
+            }
+            .total-users {
+                font-size: 0.9rem;
+                padding: 6px 12px;
+            }
+            .table th, .table td {
+                font-size: 0.85rem;
+                padding: 10px 6px;
+            }
+            .name-column {
+                max-width: 120px;
+            }
+        }
+        @media (max-width: 768px) {
+            .container {
+                padding-left: 8px;
+                padding-right: 8px;
+            }
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+            .header h1 {
+                font-size: 1.3rem;
+            }
+            .total-users {
+                font-size: 0.85rem;
+                align-self: center;
+            }
+            .table-responsive {
+                border: none;
+            }
+            .table th, .table td {
+                font-size: 0.8rem;
+                padding: 8px 4px;
+            }
+            .btn-delete {
+                font-size: 0.9rem;
+                padding: 4px;
+            }
+            .search-container .form-control {
+                font-size: 0.85rem;
+                padding: 8px;
+            }
+            .name-column {
+                max-width: 100px;
+            }
+            /* Hide less critical columns on small screens */
+            .table th:nth-child(4), .table td:nth-child(4), /* IP Address */
+            .table th:nth-child(6), .table td:nth-child(6), /* Total Cards */
+            .table th:nth-child(8), .table td:nth-child(8), /* Total Invites */
+            .table th:nth-child(9), .table td:nth-child(9)  /* Created At */
+            {
+                display: none;
+            }
+        }
+        @media (max-width: 576px) {
+            .header h1 {
+                font-size: 1.2rem;
+            }
+            .total-users {
+                font-size: 0.8rem;
+                padding: 5px 10px;
+            }
+            .table th, .table td {
+                font-size: 0.75rem;
+                padding: 6px 3px;
+            }
+            .btn-delete {
+                font-size: 0.85rem;
+            }
+            .search-container .form-control {
+                font-size: 0.8rem;
+                padding: 6px;
+            }
+            .name-column {
+                max-width: 80px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>User Management Admin Panel</h1>
+            <div class="total-users" id="totalUsers">Total Users: 0</div>
+        </div>
+
+        <div class="row">
+            <div class="col-12">
+                <div class="table-container">
+                    <div class="search-container">
+                        <input type="text" class="form-control" id="searchInput" placeholder="Search by name or user ID">
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead>
+                                <tr>
+                                    <th scope="col" style="width: 5%" data-sort="index" data-order="asc">#</th>
+                                    <th scope="col" style="width: 20%" data-sort="name" data-order="asc">Name <i class="fas fa-sort sort-icon"></i></th>
+                                    <th scope="col" style="width: 20%" data-sort="user_id" data-order="asc">User ID <i class="fas fa-sort sort-icon"></i></th>
+                                    <th scope="col" style="width: 15%" data-sort="ip_address" data-order="asc">IP Address <i class="fas fa-sort sort-icon"></i></th>
+                                    <th scope="col" style="width: 15%" data-sort="balance" data-order="asc">Balance <i class="fas fa-sort sort-icon"></i></th>
+                                    <th scope="col" style="width: 10%">Total Cards</th>
+                                    <th scope="col" style="width: 10%" data-sort="total_tasks" data-order="asc">Total Tasks <i class="fas fa-sort sort-icon"></i></th>
+                                    <th scope="col" style="width: 10%">Total Invites</th>
+                                    <th scope="col" style="width: 15%" data-sort="created_at" data-order="asc">Created At <i class="fas fa-sort sort-icon"></i></th>
+                                    <th scope="col" style="width: 10%">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="userListContainer">
+                                <tr>
+                                    <td colspan="10" class="text-center">
+                                        <div class="spinner-border text-primary" role="status">
+                                            <span class="visually-hidden">Loading...</span>
+                                        </div>
+                                        <p class="mb-0 mt-2">Loading users...</p>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Pin Modal -->
+    <div class="modal fade" id="adminPinModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-warning">
+                    <h5 class="modal-title">Admin Authentication Required</h5>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="adminPinInput" class="form-label">Enter Admin PIN</label>
+                        <input type="password" class="form-control" id="adminPinInput" placeholder="Enter admin pin">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" id="submitAdminPin">Submit</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Global variables
+        const API_URL = 'users.php/users';
+        let users = [];
+        let filteredUsers = [];
+        let adminPin = localStorage.getItem('admin_pin') || '';
+        let adminPinModal = new bootstrap.Modal(document.getElementById('adminPinModal'));
+        let currentSort = { field: 'created_at', order: 'desc' };
+
+        // Helper function to truncate name to 7 characters
+        function truncateName(name) {
+            if (!name) return 'Unknown';
+            // Split into Unicode code points to handle multi-byte characters
+            const chars = Array.from(name.normalize('NFC'));
+            if (chars.length <= 7) return name;
+            return chars.slice(0, 7).join('') + '...';
+        }
+
+        // Initialize the admin panel
+        document.addEventListener('DOMContentLoaded', function() {
+            checkAdminPin();
+            document.getElementById('submitAdminPin').addEventListener('click', submitAdminPin);
+            document.getElementById('searchInput').addEventListener('input', filterUsers);
+            document.querySelectorAll('th[data-sort]').forEach(th => {
+                th.addEventListener('click', () => sortTable(th.getAttribute('data-sort')));
+            });
+            if (adminPin) {
+                loadUsers();
+            }
+        });
+
+        // Check admin pin and show modal if needed
+        function checkAdminPin() {
+            if (!adminPin) {
+                adminPinModal.show();
+            }
+        }
+
+        // Submit admin pin
+        async function submitAdminPin() {
+            const pin = document.getElementById('adminPinInput').value.trim();
+            if (!pin) {
+                showError('Please enter admin pin');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}?admin_pin=${encodeURIComponent(pin)}`, {
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json; charset=utf-8'
+                    }
+                });
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const data = await response.json();
+                if (data.status === 'success') {
+                    adminPin = pin;
+                    localStorage.setItem('admin_pin', pin);
+                    adminPinModal.hide();
+                    loadUsers();
+                } else {
+                    showError(data.message || 'Invalid admin pin');
+                }
+            } catch (error) {
+                showError('Error verifying admin pin: ' + error.message);
+            }
+        }
+
+        // Load users from API
+        async function loadUsers() {
+            showLoading('Loading users...');
+
+            try {
+                const response = await fetch(`${API_URL}?admin_pin=${encodeURIComponent(adminPin)}`, {
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json; charset=utf-8'
+                    }
+                });
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const text = await response.text();
+                const data = JSON.parse(text);
+                if (data.status === 'success') {
+                    users = data.data || [];
+                    filteredUsers = [...users];
+                    sortUsers();
+                    renderUserList();
+                    updateTotalUsers();
+                } else {
+                    showError(data.message || 'Failed to load users');
+                    if (data.message.includes('pin')) {
+                        localStorage.removeItem('admin_pin');
+                        adminPin = '';
+                        checkAdminPin();
+                    }
+                }
+            } catch (error) {
+                showError('Error loading users: ' + error.message);
+            }
+        }
+
+        // Filter users based on search input
+        function filterUsers() {
+            const query = document.getElementById('searchInput').value;
+            filteredUsers = users.filter(user => {
+                const name = (user.name || 'Unknown').normalize('NFC');
+                const userId = user.user_id.toString();
+                const regex = new RegExp(query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
+                return (
+                    regex.test(name) ||
+                    regex.test(userId)
+                );
+            });
+            sortUsers();
+            renderUserList();
+            updateTotalUsers();
+        }
+
+        // Sort users
+        function sortTable(field) {
+            if (currentSort.field === field) {
+                currentSort.order = currentSort.order === 'asc' ? 'desc' : 'asc';
+            } else {
+                currentSort.field = field;
+                currentSort.order = 'asc';
+            }
+            sortUsers();
+            renderUserList();
+            updateTotalUsers();
+            updateSortIcons();
+        }
+
+        function sortUsers() {
+            filteredUsers.sort((a, b) => {
+                let valueA, valueB;
+                switch (currentSort.field) {
+                    case 'index':
+                        return 0; // Index is handled in rendering
+                    case 'name':
+                        valueA = (a.name || 'Unknown').normalize('NFC');
+                        valueB = (b.name || 'Unknown').normalize('NFC');
+                        break;
+                    case 'user_id':
+                        valueA = a.user_id;
+                        valueB = b.user_id;
+                        break;
+                    case 'ip_address':
+                        valueA = (a.ip_address || '').normalize('NFC');
+                        valueB = (b.ip_address || '').normalize('NFC');
+                        break;
+                    case 'balance':
+                        valueA = parseFloat(a.balance);
+                        valueB = parseFloat(b.balance);
+                        break;
+                    case 'total_tasks':
+                        valueA = Array.isArray(a.completed_task_ids) ? a.completed_task_ids.length : 0;
+                        valueB = Array.isArray(b.completed_task_ids) ? b.completed_task_ids.length : 0;
+                        break;
+                    case 'created_at':
+                        valueA = new Date(a.created_at);
+                        valueB = new Date(b.created_at);
+                        break;
+                    default:
+                        return 0;
+                }
+                if (valueA < valueB) return currentSort.order === 'asc' ? -1 : 1;
+                if (valueA > valueB) return currentSort.order === 'asc' ? 1 : -1;
+                return 0;
+            });
+        }
+
+        function updateSortIcons() {
+            document.querySelectorAll('th[data-sort] .sort-icon').forEach(icon => {
+                icon.classList.remove('fa-sort-up', 'fa-sort-down', 'fa-sort', 'active');
+                icon.classList.add('fa-sort');
+            });
+            const activeTh = document.querySelector(`th[data-sort="${currentSort.field}"] .sort-icon`);
+            if (activeTh) {
+                activeTh.classList.add(currentSort.order === 'asc' ? 'fa-sort-up' : 'fa-sort-down', 'active');
+            }
+        }
+
+        // Render user list
+        function renderUserList() {
+            const container = document.getElementById('userListContainer');
+
+            if (filteredUsers.length === 0) {
+                container.innerHTML = `
+                    <tr>
+                        <td colspan="10" class="text-center">
+                            <div class="alert alert-info mb-0">No users found</div>
+                        </td>
+                    </tr>`;
+                return;
+            }
+
+            let html = '';
+            filteredUsers.forEach((user, index) => {
+                const scratchCards = Array.isArray(user.scratch_card) ? user.scratch_card : [];
+                const completedTasks = Array.isArray(user.completed_task_ids) ? user.completed_task_ids : [];
+                const reflist = Array.isArray(user.reflist) ? user.reflist : [];
+                const safeName = (user.name || 'Unknown').replace(/</g, '<').replace(/>/g, '>');
+                const displayName = truncateName(safeName);
+                html += `
+                    <tr>
+                        <td>${index + 1}</td>
+                        <td class="name-column">${displayName}</td>
+                        <td>${user.user_id}</td>
+                        <td>${user.ip_address || ''}</td>
+                        <td>${parseFloat(user.balance).toFixed(2)}</td>
+                        <td>${scratchCards.length}</td>
+                        <td>${completedTasks.length}</td>
+                        <td>${reflist.length}</td>
+                        <td>${new Date(user.created_at).toLocaleString()}</td>
+                        <td>
+                            <button class="btn btn-link btn-delete" title="Delete User" data-id="${user.user_id}">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            container.innerHTML = html;
+
+            // Add event listeners to delete buttons
+            document.querySelectorAll('.btn-delete').forEach(button => {
+                button.addEventListener('click', function() {
+                    const userId = this.getAttribute('data-id');
+                    confirmDeleteUser(userId);
+                });
+            });
+        }
+
+        // Update total users display
+        function updateTotalUsers() {
+            const totalUsersEl = document.getElementById('totalUsers');
+            if (filteredUsers.length === users.length) {
+                totalUsersEl.textContent = `Total Users: ${users.length}`;
+            } else {
+                totalUsersEl.textContent = `Showing ${filteredUsers.length} of ${users.length} Users`;
+            }
+        }
+
+        // Confirm and delete user
+        function confirmDeleteUser(userId) {
+            const user = users.find(u => u.user_id == userId);
+            if (!user) return;
+
+            const safeName = (user.name || 'Unknown').replace(/</g, '<').replace(/>/g, '>');
+            const displayName = truncateName(safeName);
+            Swal.fire({
+                title: 'Delete User?',
+                html: `Are you sure you want to delete the user ${displayName} (ID: ${user.user_id})?`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#dc3545',
+                confirmButtonText: 'Delete',
+                cancelButtonText: 'Cancel'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    deleteUser(userId);
+                }
+            });
+        }
+
+        // Delete user
+        async function deleteUser(userId) {
+            showLoading('Deleting user...');
+
+            try {
+                const response = await fetch(`${API_URL}/${userId}?admin_pin=${encodeURIComponent(adminPin)}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json; charset=utf-8'
+                    }
+                });
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const data = await response.json();
+                if (data.status === 'success') {
+                    showSuccess(data.message);
+                    loadUsers();
+                } else {
+                    showError(data.message || 'Failed to delete user');
+                    if (data.message.includes('pin')) {
+                        localStorage.removeItem('admin_pin');
+                        adminPin = '';
+                        checkAdminPin();
+                    }
+                }
+            } catch (error) {
+                showError('Error: ' + error.message);
+            }
+        }
+
+        // Helper functions
+        function showLoading(message) {
+            document.getElementById('userListContainer').innerHTML = `
+                <tr>
+                    <td colspan="10" class="text-center">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="mb-0 mt-2">${message}</p>
+                    </td>
+                </tr>
+            `;
+        }
+
+        function showSuccess(message) {
+            Swal.fire({
+                icon: 'success',
+                title: 'Success',
+                text: message,
+                timer: 2000,
+                showConfirmButton: false
+            });
+        }
+
+        function showError(message) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: message
+            });
+        }
+
+        function redirect(url, vibrate) {
+            if (vibrate && navigator.vibrate) navigator.vibrate(7);
+            window.location.href = url;
+        }
+
+        navFooter.add(
+    {
+        theme: 'light',
+        selectedColor: 'blue'
+    },
+    [
+        {
+            name: "TASK",
+            icon: "fa-tasks",
+            onClick: (e) => redirect("index.html", true)
+        },
+        {
+            name: "SETTINGS",
+            icon: "fa-gear",
+            onClick: (e) => redirect("settings.html", true)
+        },
+        {
+            name: "BONUS",
+            icon: "fa-user-plus",
+            onClick: (e) => redirect("rewards.html", true)
+        },
+        {
+            name: "WITHDRAWS",
+            icon: "fa-money-bill",
+            onClick: (e) => redirect("withdraw.html", true)
+        },
+        {
+            name: "USERS",
+            icon: "fa-users",
+            onClick: (e) => redirect("users.html", true)
+        },
+        {
+            name: "ADS",
+            icon: "fa-chart-bar",
+            selected: true,
+            onClick: (e) => redirect("ads-stats.html", true)
+        }
+    ]
+);
+    </script>
+</body>
+</html>

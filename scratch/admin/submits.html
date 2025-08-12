@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Submissions Admin</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        :root {
+            --bg-color: #1a1a2e;
+            --card-bg: #16213e;
+            --primary-color: #00f5d4;
+            --secondary-color: #ff2d75;
+            --text-color: #e6e6e6;
+            --border-color: #2a3a5e;
+            --success-color: #10b981;
+            --error-color: #ef4444;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            min-height: 100vh;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        h1 {
+            color: var(--primary-color);
+            font-size: 28px;
+        }
+
+        .btn {
+            background-color: var(--secondary-color);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn:hover {
+            background-color: #d91a5b;
+            transform: translateY(-2px);
+        }
+
+        .btn i {
+            font-size: 16px;
+        }
+
+        .submissions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .submission-card {
+            background-color: var(--card-bg);
+            border-radius: 10px;
+            padding: 20px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .submission-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(124, 58, 237, 0.2);
+        }
+
+        .submission-id {
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+
+        .submission-date {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .submission-detail {
+            margin-bottom: 10px;
+        }
+
+        .detail-label {
+            font-weight: 600;
+            color: var(--primary-color);
+            margin-right: 5px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 50px 20px;
+            color: var(--text-secondary);
+            grid-column: 1 / -1;
+        }
+
+        .empty-state i {
+            font-size: 50px;
+            margin-bottom: 20px;
+            color: var(--primary-color);
+        }
+
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 50px;
+            grid-column: 1 / -1;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(124, 58, 237, 0.2);
+            border-top-color: var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .confirmation-checkbox {
+            display: flex;
+            align-items: center;
+            margin: 10px 0;
+            padding: 10px;
+            background: rgba(239, 68, 68, 0.1);
+            border-radius: 6px;
+        }
+
+        .confirmation-checkbox input {
+            margin-right: 10px;
+            width: 18px;
+            height: 18px;
+        }
+
+        @media (max-width: 768px) {
+            .submissions-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            header {
+                flex-direction: column;
+                gap: 15px;
+                align-items: flex-start;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-video"></i> Video Submissions</h1>
+            <button class="btn" id="deleteAllBtn">
+                <i class="fas fa-trash-alt"></i> Delete All Submissions
+            </button>
+        </header>
+
+        <div class="submissions-grid" id="submissionsContainer">
+            <div class="loading">
+                <div class="spinner"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // DOM Elements
+        const submissionsContainer = document.getElementById('submissionsContainer');
+        const deleteAllBtn = document.getElementById('deleteAllBtn');
+        
+        // API Endpoint
+        const API_URL = 'submits.php';
+        
+        // Fetch submissions from API
+        async function fetchSubmissions() {
+            try {
+                submissionsContainer.innerHTML = `
+                    <div class="loading">
+                        <div class="spinner"></div>
+                    </div>
+                `;
+                
+                const response = await fetch(API_URL);
+                const data = await response.json();
+                
+                if (data.ok && data.submissions && data.submissions.length > 0) {
+                    renderSubmissions(data.submissions);
+                } else {
+                    showEmptyState();
+                }
+            } catch (error) {
+                console.error('Error fetching submissions:', error);
+                submissionsContainer.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <h3>Failed to load submissions</h3>
+                        <p>Please try again later</p>
+                    </div>
+                `;
+            }
+        }
+        
+        // Render submissions to the page
+        function renderSubmissions(submissions) {
+            submissionsContainer.innerHTML = '';
+            
+            submissions.forEach(submission => {
+                const card = document.createElement('div');
+                card.className = 'submission-card';
+                
+                card.innerHTML = `
+                    <div class="submission-header">
+                        <span class="submission-id">Submission #${submission.id}</span>
+                        <span class="submission-date">${formatDate(submission.submitted_at)}</span>
+                    </div>
+                    <div class="submission-detail">
+                        <span class="detail-label">User ID:</span>
+                        <span>${submission.user_id}</span>
+                    </div>
+                    <div class="submission-detail">
+                        <span class="detail-label">Email:</span>
+                        <span>${submission.email}</span>
+                    </div>
+                    <div class="submission-detail">
+                        <span class="detail-label">Platform:</span>
+                        <span>${submission.platform_name}</span>
+                    </div>
+                    <div class="submission-detail">
+                        <span class="detail-label">Video Link:</span>
+                        <a href="${submission.video_link}" target="_blank" style="color: var(--primary-color);">View Video</a>
+                    </div>
+                    <div class="submission-detail">
+                        <span class="detail-label">Message:</span>
+                        <span>${submission.additional_message || 'None'}</span>
+                    </div>
+                `;
+                
+                submissionsContainer.appendChild(card);
+            });
+        }
+        
+        // Show empty state when no submissions
+        function showEmptyState() {
+            submissionsContainer.innerHTML = `
+                <div class="empty-state">
+                    <i class="fas fa-box-open"></i>
+                    <h3>No submissions found</h3>
+                    <p>There are currently no video submissions</p>
+                </div>
+            `;
+        }
+        
+        // Format date for display
+        function formatDate(dateString) {
+            const options = { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' };
+            return new Date(dateString).toLocaleDateString('en-US', options);
+        }
+        
+        // Delete all submissions with triple confirmation
+        async function deleteAllSubmissions() {
+            try {
+                // First confirmation
+                const firstConfirm = await Swal.fire({
+                    title: 'Are you sure?',
+                    text: "This will delete ALL video submissions permanently!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#ef4444',
+                    cancelButtonColor: '#6b7280',
+                    confirmButtonText: 'Yes, delete all!',
+                    background: '#1a1a2e',
+                    color: '#e0e0e0'
+                });
+                
+                if (!firstConfirm.isConfirmed) return;
+                
+                // Second confirmation with checkbox
+                const { value: secondConfirm } = await Swal.fire({
+                    title: 'Type "DELETE" to confirm',
+                    input: 'text',
+                    inputPlaceholder: 'Type DELETE here',
+                    showCancelButton: true,
+                    inputValidator: (value) => {
+                        if (value !== 'DELETE') {
+                            return 'You must type DELETE to confirm';
+                        }
+                    },
+                    background: '#1a1a2e',
+                    color: '#e0e0e0'
+                });
+                
+                if (!secondConfirm) return;
+                
+                // Third confirmation with checkbox
+                const { isConfirmed: thirdConfirm } = await Swal.fire({
+                    title: 'Final Confirmation',
+                    html: `
+                        <div style="text-align: left; margin-top: 20px;">
+                            <div class="confirmation-checkbox">
+                                <input type="checkbox" id="confirm1" class="swal2-checkbox">
+                                <label for="confirm1">I understand this action is irreversible</label>
+                            </div>
+                            <div class="confirmation-checkbox">
+                                <input type="checkbox" id="confirm2" class="swal2-checkbox">
+                                <label for="confirm2">I have backed up any important data</label>
+                            </div>
+                            <div class="confirmation-checkbox">
+                                <input type="checkbox" id="confirm3" class="swal2-checkbox">
+                                <label for="confirm3">I want to permanently delete all submissions</label>
+                            </div>
+                        </div>
+                    `,
+                    icon: 'error',
+                    showCancelButton: true,
+                    confirmButtonColor: '#ef4444',
+                    cancelButtonColor: '#6b7280',
+                    confirmButtonText: 'Delete All',
+                    background: '#1a1a2e',
+                    color: '#e0e0e0',
+                    preConfirm: () => {
+                        return [
+                            document.getElementById('confirm1').checked,
+                            document.getElementById('confirm2').checked,
+                            document.getElementById('confirm3').checked
+                        ].every(Boolean);
+                    }
+                });
+                
+                if (!thirdConfirm) return;
+                
+                // Show loading state
+                Swal.fire({
+                    title: 'Deleting Submissions',
+                    html: 'Please wait while we delete all submissions...',
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    },
+                    background: '#1a1a2e',
+                    color: '#e0e0e0'
+                });
+                
+                // Make API call to delete
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ action: 'reset' })
+                });
+                
+                const result = await response.json();
+                
+                if (result.ok) {
+                    await Swal.fire({
+                        title: 'Success!',
+                        text: 'All submissions have been deleted.',
+                        icon: 'success',
+                        background: '#1a1a2e',
+                        color: '#e0e0e0'
+                    });
+                    
+                    // Refresh the submissions list
+                    fetchSubmissions();
+                } else {
+                    throw new Error(result.message || 'Failed to delete submissions');
+                }
+            } catch (error) {
+                Swal.fire({
+                    title: 'Error',
+                    text: error.message || 'Failed to delete submissions',
+                    icon: 'error',
+                    background: '#1a1a2e',
+                    color: '#e0e0e0'
+                });
+            }
+        }
+        
+        // Event Listeners
+        deleteAllBtn.addEventListener('click', deleteAllSubmissions);
+        
+        // Initial load
+        document.addEventListener('DOMContentLoaded', fetchSubmissions);
+    </script>
+</body>
+</html>

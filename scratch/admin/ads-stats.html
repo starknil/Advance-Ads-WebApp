@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ad Views Analytics - Admin</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Color+Emoji&display=swap" rel="stylesheet">
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- Nav Footer -->
+    <script src="https://clients.tgbro.link/shop/api/nav-footer.js"></script>
+    <style>
+        * {
+            font-family: 'Noto Sans', sans-serif;
+        }
+        :root {
+            --bg-color: #121212;
+            --text-color: #e0e0e0;
+            --card-bg: #1e1e1e;
+            --primary-color: #7c3aed;
+        }
+        body {
+            background: var(--bg-color);
+            color: var(--text-color);
+            min-height: 100vh;
+            padding: 20px 0;
+        }
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 0 15px;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+        .header h1 {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: var(--text-color);
+        }
+        .stats-column {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            margin-bottom: 30px;
+        }
+        .stat-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(124, 58, 237, 0.2);
+        }
+        .stat-card h3 {
+            font-size: 16px;
+            color: #a0a0a0;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .stat-card h1 {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--text-color);
+            margin: 0;
+        }
+        .info-section {
+            text-align: center;
+            color: #aaa;
+            font-size: 14px;
+            margin-top: 20px;
+        }
+        .footer-nav {
+            margin-top: 40px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="fas fa-chart-bar"></i> Ad Views Analytics</h1>
+        </div>
+
+        <!-- Stats Cards (Stacked Vertically) -->
+        <div class="stats-column">
+            <!-- Today's Ad Views -->
+            <div class="stat-card">
+                <h3><i class="fas fa-eye"></i> Today's Ad Views</h3>
+                <h1 id="todayAds">—</h1>
+            </div>
+
+            <!-- Total Ad Views -->
+            <div class="stat-card">
+                <h3><i class="fas fa-chart-line"></i> Total Ad Views</h3>
+                <h1 id="totalAds">—</h1>
+            </div>
+
+            <!-- New Users Today -->
+            <div class="stat-card">
+                <h3><i class="fas fa-user-plus"></i> New Users Today</h3>
+                <h1 id="newUsers">—</h1>
+            </div>
+
+            <!-- Highest Earner Today -->
+            <div class="stat-card">
+                <h3><i class="fas fa-crown"></i> Top Earner Today</h3>
+                <h1 id="topEarner">—</h1>
+            </div>
+
+            <!-- Highest Ad Viewer Today -->
+            <div class="stat-card">
+                <h3><i class="fas fa-star"></i> Top Viewer Today</h3>
+                <h1 id="topViewer">—</h1>
+            </div>
+        </div>
+
+        <!-- Last Updated -->
+        <div class="info-section">
+            Last updated: <span id="lastUpdated">Never</span>
+        </div>
+    </div>
+
+    <!-- Admin PIN Modal -->
+    <div class="modal fade" id="adminPinModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-warning">
+                    <h5 class="modal-title">🔐 Admin Authentication</h5>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="adminPinInput" class="form-label">Enter Admin PIN</label>
+                        <input type="password" class="form-control" id="adminPinInput" placeholder="Enter your PIN">
+                    </div>
+                    <button class="btn btn-primary w-100" id="submitAdminPin">Submit</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer Nav -->
+    <div class="footer-nav">
+        <script>
+            navFooter.add({
+                theme: 'dark',
+                selectedColor: '#7c3aed'
+            }, [
+                { name: "TASK", icon: "fa-tasks", onClick: (e) => redirect("index.html", true) },
+                { name: "CARDS", icon: "fa-credit-card", onClick: (e) => redirect("cards.html", true) },
+                { name: "BONUS", icon: "fa-user-plus", onClick: (e) => redirect("rewards.html", true) },
+                { name: "WITHDRAW", icon: "fa-money-bill", onClick: (e) => redirect("withdraw.html", true) },
+                { name: "USERS", icon: "fa-users", onClick: (e) => redirect("users.html", true) },
+                { name: "ADS", icon: "fa-chart-bar", selected: true, onClick: (e) => redirect("ads-stats.html", true) }
+            ]);
+        </script>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const API_URL = 'ads-stats.php';
+        let adminPin = localStorage.getItem('admin_pin') || '';
+
+        function updateLastUpdated() {
+            document.getElementById('lastUpdated').textContent = new Date().toLocaleTimeString();
+        }
+
+        function showLoading() {
+            document.getElementById('todayAds').textContent = '—';
+            document.getElementById('totalAds').textContent = '—';
+            document.getElementById('newUsers').textContent = '—';
+            document.getElementById('topEarner').textContent = '—';
+            document.getElementById('topViewer').textContent = '—';
+        }
+
+        function showError(msg) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: msg,
+                confirmButtonColor: 'var(--primary-color)'
+            });
+        }
+
+        function redirect(url, vibrate) {
+            if (vibrate && navigator.vibrate) navigator.vibrate(7);
+            window.location.href = url;
+        }
+
+        // Check admin PIN
+        function checkAdminPin() {
+            if (!adminPin) {
+                const modal = new bootstrap.Modal(document.getElementById('adminPinModal'));
+                modal.show();
+            } else {
+                loadStats();
+            }
+        }
+
+        // Submit PIN
+        document.getElementById('submitAdminPin').addEventListener('click', async () => {
+            const pin = document.getElementById('adminPinInput').value.trim();
+            if (!pin) return showError('Please enter PIN');
+
+            try {
+                const response = await fetch(`${API_URL}?admin_pin=${encodeURIComponent(pin)}`);
+                const text = await response.text();
+
+                let data;
+                try {
+                    data = JSON.parse(text);
+                } catch (e) {
+                    console.error('Invalid JSON:', text);
+                    showError('Invalid response from server. Check console.');
+                    return;
+                }
+
+                if (data.status === 'success') {
+                    adminPin = pin;
+                    localStorage.setItem('admin_pin', pin);
+                    new bootstrap.Modal(document.getElementById('adminPinModal')).hide();
+                    loadStats();
+                } else {
+                    showError(data.message || 'Invalid PIN');
+                }
+            } catch (error) {
+                showError('Connection error: ' + error.message);
+            }
+        });
+
+        // Load stats
+        async function loadStats() {
+            showLoading();
+            try {
+                const response = await fetch(`${API_URL}?admin_pin=${encodeURIComponent(adminPin)}`);
+                const text = await response.text();
+
+                let data;
+                try {
+                    data = JSON.parse(text);
+                } catch (e) {
+                    console.error('Invalid JSON:', text);
+                    showError('Server returned invalid data. Check console.');
+                    return;
+                }
+
+                if (data.status === 'success') {
+                    document.getElementById('todayAds').textContent = data.data.today_ads;
+                    document.getElementById('totalAds').textContent = data.data.total_ads;
+                    document.getElementById('newUsers').textContent = data.data.new_users;
+                    document.getElementById('topEarner').textContent = data.data.top_earner?.earned ? `${data.data.top_earner.name} (${data.data.top_earner.earned})` : '—';
+                    document.getElementById('topViewer').textContent = data.data.top_viewer?.name ? `${data.data.top_viewer.name} (${data.data.top_viewer.count})` : '—';
+                    updateLastUpdated();
+                } else {
+                    showError(data.message);
+                    if (data.message.includes('pin')) {
+                        localStorage.removeItem('admin_pin');
+                        adminPin = '';
+                        checkAdminPin();
+                    }
+                }
+            } catch (error) {
+                showError('Failed to load stats: ' + error.message);
+            }
+        }
+
+        // Auto-refresh every 60 seconds
+        setInterval(loadStats, 60000);
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            checkAdminPin();
+        });
+    </script>
+</body>
+</html>

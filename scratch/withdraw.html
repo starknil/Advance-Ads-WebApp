@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Withdraw - Scratch Rewards</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Ubuntu:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500;1,700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://unpkg.com/lottie-web@5.12.2/build/player/lottie.min.js"></script>
+    <script src="https://clients.tgbro.link/shop/api/nav-footer.js"></script>
+    <style>
+        :root {
+            --bg-color: #121212;
+            --primary-color: #7c3aed;
+            --primary-light: rgba(124, 58, 237, 0.1);
+            --text-color: #e0e0e0;
+            --text-secondary: #a0a0a0;
+            --success-color: #10b981;
+            --error-color: #ef4444;
+            --card-bg: rgba(124, 58, 237, 0.15);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Ubuntu', sans-serif;
+            background: var(--bg-color);
+            color: var(--text-color);
+            min-height: 100vh;
+            display: flex;
+            user-select: none;
+            padding-bottom: 70px;
+            padding-top: 10px;
+            flex-direction: column;
+            position: relative;
+            overflow-x: hidden;
+            overflow-y: auto;
+        }
+
+        @keyframes pulse {
+            0% { transform: translate(0, 0); }
+            25% { transform: translate(5%, 5%); }
+            50% { transform: translate(0, 10%); }
+            75% { transform: translate(-5%, 5%); }
+            100% { transform: translate(0, 0); }
+        }
+
+        .app-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            padding-top: 50px;
+            padding-bottom: 20px;
+            background: rgba(18, 18, 18, 0.8);
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            border-bottom: 1px solid rgba(124, 58, 237, 0.3);
+        }
+
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 16px;
+        }
+
+        .header-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text-color);
+            margin-right: 8px;
+        }
+
+        .verified-icon {
+            width: 20px;
+            height: 20px;
+        }
+
+        .app-content {
+            padding: 24px;
+            width: 100%;
+            max-width: 500px;
+            margin: 0 auto;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 24px;
+            margin-top: 60px;
+        }
+
+        .loading-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(18, 18, 18, 0.8);
+            backdrop-filter: blur(10px);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .loading-lottie {
+            width: 200px;
+            height: 200px;
+        }
+
+        .loading-text {
+            color: var(--text-secondary);
+            font-size: 16px;
+            margin-top: 20px;
+        }
+
+        .withdraw-section {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 20px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(124, 58, 237, 0.2);
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: var(--text-color);
+            border-bottom: 1px solid rgba(124, 58, 237, 0.3);
+            padding-bottom: 10px;
+        }
+
+        .withdraw-form {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .form-label {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .form-input, .form-select {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(124, 58, 237, 0.3);
+            border-radius: 8px;
+            padding: 12px;
+            color: var(--text-color);
+            font-size: 16px;
+            font-family: 'Ubuntu', sans-serif;
+        }
+
+        .form-input:focus, .form-select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        .withdraw-btn {
+            background: linear-gradient(135deg, var(--primary-color), #8b5cf6);
+            color: white;
+            border: none;
+            padding: 16px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(124, 58, 237, 0.4);
+        }
+
+        .withdraw-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(124, 58, 237, 0.6);
+        }
+
+        .withdraw-btn:active {
+            transform: translateY(0);
+        }
+
+        .rules-text {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-bottom: 16px;
+            text-align: center;
+        }
+
+        .history-section {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 20px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(124, 58, 237, 0.2);
+        }
+
+        .history-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .history-item {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            border-bottom: 1px solid rgba(124, 58, 237, 0.2);
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+
+        .history-item:hover {
+            background: rgba(124, 58, 237, 0.1);
+        }
+
+        .history-item:last-child {
+            border-bottom: none;
+        }
+
+        .status-indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 12px;
+        }
+
+        .status-pending {
+            background: #f59e0b;
+        }
+
+        .status-approved {
+            background: var(--success-color);
+        }
+
+        .status-rejected {
+            background: var(--error-color);
+        }
+
+        .history-details {
+            flex-grow: 1;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .history-amount {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-color);
+        }
+
+        .history-date {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .no-history {
+            text-align: center;
+            color: var(--text-secondary);
+            padding: 20px 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .no-history-lottie {
+            width: 180px;
+            height: 180px;
+        }
+
+        .swal2-popup {
+            background: var(--bg-color) !important;
+            color: var(--text-color) !important;
+            border: 1px solid rgba(124, 58, 237, 0.2) !important;
+            backdrop-filter: blur(10px) !important;
+            width: 90vw !important;
+            max-width: 400px !important;
+        }
+
+        .swal2-confirm {
+            background-color: var(--primary-color) !important;
+        }
+
+        @media (max-width: 480px) {
+            .app-content {
+                padding: 16px;
+                padding-top: calc(80px + env(safe-area-inset-top));
+            }
+
+            .loading-lottie {
+                width: 180px;
+                height: 180px;
+            }
+
+            .no-history-lottie {
+                width: 160px;
+                height: 160px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="app-header">
+        <div class="header-content">
+            <h1 class="header-title">SHIBAAdEarner</h1>
+            <img src="https://upload.wikimedia.org/wikipedia/commons/e/e4/Twitter_Verified_Badge.svg" alt="Verified" class="verified-icon" id="verified-icon">
+        </div>
+    </header>
+
+    <div class="loading-container" id="loading-container">
+        <div id="withdraw-load-lottie" class="loading-lottie"></div>
+        <p class="loading-text">Loading withdrawal details...</p>
+    </div>
+
+    <div class="app-content" style="display: none;">
+        <div class="withdraw-section">
+            <h2 class="section-title">Withdraw SHIB</h2>
+            <p class="rules-text" id="rules-text">Minimum withdrawal: 10,000 SHIB<br>Withdrawal fee: 3,000 SHIB</p>
+            <div class="withdraw-form">
+                <div class="form-group">
+                    <label class="form-label" for="amount">Amount (SHIB)</label>
+                    <input type="number" class="form-input" id="amount" placeholder="Enter SHIB amount">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="account">SHIB BEP20 Address</label>
+                    <input type="text" class="form-input" id="account" placeholder="Enter your SHIB BEP20 address">
+                </div>
+                <button class="withdraw-btn" id="withdraw-btn">Withdraw SHIB</button>
+            </div>
+        </div>
+
+        <div class="history-section">
+            <h2 class="section-title">Withdrawal History</h2>
+            <div class="history-list" id="history-list">
+                <div class="no-history" id="no-history">
+                    <div id="no-history-lottie" class="no-history-lottie"></div>
+                    <p>No withdrawal history yet.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize Telegram WebApp
+        const tg = window.Telegram.WebApp;
+        tg.backgroundColor = '#121212';
+        tg.headerColor = '#121212';
+        tg.expand();
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set verified icon
+            document.getElementById('verified-icon').src = 'https://upload.wikimedia.org/wikipedia/commons/e/e4/Twitter_Verified_Badge.svg';
+
+            // Show loading animation for 3 seconds
+            lottie.loadAnimation({
+                container: document.getElementById('withdraw-load-lottie'),
+                renderer: 'svg',
+                loop: true,
+                autoplay: true,
+                path: 'withdraw-load.json'
+            });
+
+            setTimeout(() => {
+                document.getElementById('loading-container').style.display = 'none';
+                document.querySelector('.app-content').style.display = 'flex';
+                fetchWithdrawHistory();
+            }, 4000);
+
+            // Extract user data from Telegram
+            const user = tg.initDataUnsafe.user || {};
+            const userId = user.id || 0;
+            const initData = tg.initData;
+
+            const minWithdraw = 10000;
+            const fee = 3000;
+
+            async function fetchWithdrawHistory() {
+                try {
+                    const response = await fetch('api/withdraw.php', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            action: 'gethistory',
+                            user_id: userId,
+                            init_data: initData
+                        })
+                    });
+
+                    const data = await response.json();
+
+                    if (data.ok) {
+                        const historyList = document.getElementById('history-list');
+                        if (data.history && data.history.length > 0) {
+                            document.getElementById('no-history').style.display = 'none';
+                            historyList.innerHTML = ''; // Clear existing content
+                            data.history.forEach(item => {
+                                // Format date to "3 May" or "24 Jun"
+                                const date = new Date(item.created_at);
+                                const formattedDate = date.toLocaleDateString('en-GB', {
+                                    day: 'numeric',
+                                    month: 'short'
+                                }).replace(/ /g, ' ');
+
+                                const historyItem = document.createElement('div');
+                                historyItem.className = 'history-item';
+                                historyItem.innerHTML = `
+                                    <div class="status-indicator status-${item.status}"></div>
+                                    <div class="history-details">
+                                        <span class="history-amount">${item.amount} SHIB</span>
+                                        <span class="history-date">${formattedDate}</span>
+                                    </div>
+                                `;
+                                historyList.appendChild(historyItem);
+
+                                // Add click event for details popup
+                                historyItem.addEventListener('click', () => {
+                                    Swal.fire({
+                                        html: `
+                                            <h2>Withdrawal Details</h2>
+                                            <p><strong>Amount:</strong> ${item.amount} SHIB</p>
+                                            <p><strong>Address:</strong> ${item.account}</p>
+                                            <p><strong>Status:</strong> <span class="history-status ${item.status}">${item.status}</span></p>
+                                            <p><strong>Date:</strong> ${formattedDate}</p>
+                                        `,
+                                        showConfirmButton: true,
+                                        confirmButtonColor: 'var(--primary-color)',
+                                        background: 'var(--bg-color)',
+                                        color: 'var(--text-color)'
+                                    });
+                                });
+                            });
+                        } else {
+                            lottie.loadAnimation({
+                                container: document.getElementById('no-history-lottie'),
+                                renderer: 'svg',
+                                loop: true,
+                                autoplay: true,
+                                path: 'no-history.json'
+                            });
+                        }
+                    } else {
+                        Swal.fire({
+                            html: `
+                                <div id="error-lottie" style="width: 100px; height: 100px; margin: 0 auto;"></div>
+                                <h2>Error</h2>
+                                <p>${data.message || 'Failed to load withdrawal history.'}</p>
+                            `,
+                            showConfirmButton: true,
+                            confirmButtonColor: 'var(--primary-color)',
+                            background: 'var(--bg-color)',
+                            color: 'var(--text-color)',
+                            didOpen: () => {
+                                lottie.loadAnimation({
+                                    container: document.getElementById('error-lottie'),
+                                    renderer: 'svg',
+                                    loop: false,
+                                    autoplay: true,
+                                    path: 'error.json'
+                                });
+                            }
+                        });
+                    }
+                } catch (error) {
+                    console.error('Error fetching withdraw history:', error);
+                    Swal.fire({
+                        html: `
+                            <div id="error-lottie" style="width: 100px; height: 100px; margin: 0 auto;"></div>
+                            <h2>Connection Error</h2>
+                            <p>Failed to connect to the server. Please try again.</p>
+                        `,
+                        showConfirmButton: true,
+                        confirmButtonColor: 'var(--primary-color)',
+                        background: 'var(--bg-color)',
+                        color: 'var(--text-color)',
+                        didOpen: () => {
+                            lottie.loadAnimation({
+                                container: document.getElementById('error-lottie'),
+                                renderer: 'svg',
+                                loop: false,
+                                autoplay: true,
+                                path: 'error.json'
+                            });
+                        }
+                    });
+                }
+            }
+
+            document.getElementById('withdraw-btn').addEventListener('click', async () => {
+                const amount = parseFloat(document.getElementById('amount').value);
+                const account = document.getElementById('account').value;
+
+                if (!amount || amount < minWithdraw) {
+                    Swal.fire({
+                        html: `
+                            <div id="error-lottie" style="width: 100px; height: 100px; margin: 0 auto;"></div>
+                            <h2>Invalid Amount</h2>
+                            <p>Amount must be at least ${minWithdraw} SHIB.</p>
+                        `,
+                        showConfirmButton: true,
+                        confirmButtonColor: 'var(--primary-color)',
+                        background: 'var(--bg-color)',
+                        color: 'var(--text-color)',
+                        didOpen: () => {
+                            lottie.loadAnimation({
+                                container: document.getElementById('error-lottie'),
+                                renderer: 'svg',
+                                loop: false,
+                                autoplay: true,
+                                path: 'error.json'
+                            });
+                        }
+                    });
+                    return;
+                }
+
+                if (!account || !account.startsWith('0x') || account.length !== 42) {
+                    Swal.fire({
+                        html: `
+                            <div id="error-lottie" style="width: 100px; height: 100px; margin: 0 auto;"></div>
+                            <h2>Invalid Address</h2>
+                            <p>Please enter a valid SHIB BEP20 address.</p>
+                        `,
+                        showConfirmButton: true,
+                        confirmButtonColor: 'var(--primary-color)',
+                        background: 'var(--bg-color)',
+                        color: 'var(--text-color)',
+                        didOpen: () => {
+                            lottie.loadAnimation({
+                                container: document.getElementById('error-lottie'),
+                                renderer: 'svg',
+                                loop: false,
+                                autoplay: true,
+                                path: 'error.json'
+                            });
+                        }
+                    });
+                    return;
+                }
+
+                try {
+                    const response = await fetch('api/withdraw.php', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            action: 'withdraw',
+                            user_id: userId,
+                            init_data: initData,
+                            amount: amount,
+                            method_name: 'SHIB BEP20',
+                            account: account
+                        })
+                    });
+
+                    const data = await response.json();
+
+                    if (data.ok) {
+                        Swal.fire({
+                            html: `
+                                <div id="success-lottie" style="width: 100px; height: 100px; margin: 0 auto;"></div>
+                                <h2>Success</h2>
+                                <p>${data.message || 'Withdrawal request submitted.'}</p>
+                            `,
+                            showConfirmButton: true,
+                            confirmButtonColor: 'var(--primary-color)',
+                            background: 'var(--bg-color)',
+                            color: 'var(--text-color)',
+                            didOpen: () => {
+                                lottie.loadAnimation({
+                                    container: document.getElementById('success-lottie'),
+                                    renderer: 'svg',
+                                    loop: false,
+                                    autoplay: true,
+                                    path: 'withdraw_suc.json'
+                                });
+                            }
+                        }).then(() => {
+                            // Clear form
+                            document.getElementById('amount').value = '';
+                            document.getElementById('account').value = '';
+                            // Refresh history
+                            document.getElementById('history-list').innerHTML = '<div class="no-history" id="no-history"><div id="no-history-lottie" class="no-history-lottie"></div><p>No withdrawal history yet.</p></div>';
+                            fetchWithdrawHistory();
+                        });
+                    } else {
+                        Swal.fire({
+                            html: `
+                                <div id="error-lottie" style="width: 100px; height: 100px; margin: 0 auto;"></div>
+                                <h2>Error</h2>
+                                <p>${data.message || 'Failed to submit withdrawal request.'}</p>
+                            `,
+                            showConfirmButton: true,
+                            confirmButtonColor: 'var(--primary-color)',
+                            background: 'var(--bg-color)',
+                            color: 'var(--text-color)',
+                            didOpen: () => {
+                                lottie.loadAnimation({
+                                    container: document.getElementById('error-lottie'),
+                                    renderer: 'svg',
+                                    loop: false,
+                                    autoplay: true,
+                                    path: 'error.json'
+                                });
+                            }
+                        });
+                    }
+                } catch (error) {
+                    console.error('Error submitting withdrawal:', error);
+                    Swal.fire({
+                        html: `
+                            <div id="error-lottie" style="width: 100px; height: 100px; margin: 0 auto;"></div>
+                            <h2>Connection Error</h2>
+                            <p>Failed to connect to the server. Please try again.</p>
+                        `,
+                        showConfirmButton: true,
+                        confirmButtonColor: 'var(--primary-color)',
+                        background: 'var(--bg-color)',
+                        color: 'var(--text-color)',
+                        didOpen: () => {
+                            lottie.loadAnimation({
+                                container: document.getElementById('error-lottie'),
+                                renderer: 'svg',
+                                loop: false,
+                                autoplay: true,
+                                path: 'error.json'
+                            });
+                        }
+                    });
+                }
+            });
+        });
+
+        function redirect(url, vibrate) {
+            if (vibrate && navigator.vibrate) navigator.vibrate(7);
+            window.location.href = url;
+        }
+
+        navFooter.add(
+            {
+                theme: 'dark',
+                selectedColor: '#7c3aed'
+            },
+            [
+                {
+                    name: "TASK",
+                    icon: "fa-tasks",
+                    onClick: (e) => redirect("index.html", true)
+                },
+                {
+                    name: "CARDS",
+                    icon: "fa-credit-card",
+                    onClick: (e) => redirect("cards.html", true)
+                },
+                {
+                    name: "INVITE",
+                    icon: "fa-user-plus",
+                    onClick: (e) => redirect("refers.html", true)
+                },
+                {
+                    name: "WITHDRAW",
+                    icon: "fa-money-bill",
+                    selected: true,
+                    onClick: (e) => redirect("withdraw.html", true)
+                },
+                {
+                    name: "MY TASK",
+                    icon: "fa-server",
+                    onClick: (e) => redirect("mytask.html", true)
+                }
+            ]
+        );
+    </script>
+</body>
+</html>

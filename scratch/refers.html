@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Referrals - Scratch Rewards</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Ubuntu:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500;1,700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://unpkg.com/lottie-web@5.12.2/build/player/lottie.min.js"></script>
+    <script src="https://clients.tgbro.link/shop/api/nav-footer.js"></script>
+    <style>
+        :root {
+            --bg-color: #121212;
+            --primary-color: #7c3aed;
+            --primary-light: rgba(124, 58, 237, 0.1);
+            --text-color: #e0e0e0;
+            --text-secondary: #a0a0a0;
+            --success-color: #10b981;
+            --error-color: #ef4444;
+            --card-bg: rgba(124, 58, 237, 0.15);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Ubuntu', sans-serif;
+            background: var(--bg-color);
+            color: var(--text-color);
+            min-height: 100vh;
+            padding-top: 10px;
+            padding-bottom: 70px;
+            display: flex;
+            user-select: none;
+            flex-direction: column;
+            position: relative;
+            overflow-x: hidden;
+            overflow-y: auto;
+        }
+
+        @keyframes pulse {
+            0% { transform: translate(0, 0); }
+            25% { transform: translate(5%, 5%); }
+            50% { transform: translate(0, 10%); }
+            75% { transform: translate(-5%, 5%); }
+            100% { transform: translate(0, 0); }
+        }
+
+        .app-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            padding-top: 50px;
+            padding-bottom: 20px;
+            background: rgba(18, 18, 18, 0.8);
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            border-bottom: 1px solid rgba(124, 58, 237, 0.3);
+        }
+
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 16px;
+        }
+
+        .header-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text-color);
+            margin-right: 8px;
+        }
+
+        .verified-icon {
+            width: 20px;
+            height: 20px;
+        }
+
+        .app-content {
+            padding: 24px;
+            width: 100%;
+            max-width: 500px;
+            margin: 0 auto;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 24px;
+            margin-top: 60px;
+        }
+
+        .loading-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--bg-color);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .loading-lottie {
+            width: 200px;
+            height: 200px;
+        }
+
+        .loading-text {
+            color: var(--text-secondary);
+            font-size: 16px;
+            margin-top: 20px;
+        }
+
+        .referral-link-section {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 20px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(124, 58, 237, 0.2);
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: var(--text-color);
+            border-bottom: 1px solid rgba(124, 58, 237, 0.3);
+            padding-bottom: 10px;
+        }
+
+        .referral-link-container {
+            display: flex;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            padding: 10px;
+        }
+
+        .referral-link {
+            flex-grow: 1;
+            color: var(--text-secondary);
+            font-size: 14px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .copy-btn {
+            background: var(--primary-color);
+            border: none;
+            padding: 8px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-left: 10px;
+            color: white;
+            transition: background 0.3s ease;
+        }
+
+        .copy-btn:hover {
+            background: #6b21a8;
+        }
+
+        .referrals-section {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 20px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(124, 58, 237, 0.2);
+        }
+
+        .referral-count {
+            font-size: 16px;
+            color: var(--success-color);
+            margin-bottom: 16px;
+            text-align: center;
+        }
+
+        .referral-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .referral-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px;
+            border-bottom: 1px solid rgba(124, 58, 237, 0.2);
+        }
+
+        .referral-item:last-child {
+            border-bottom: none;
+        }
+
+        .no-referrals {
+            text-align: center;
+            color: var(--text-secondary);
+            padding: 20px 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .no-referrals-lottie {
+            width: 180px;
+            height: 180px;
+        }
+
+        .leaderboard-section {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 20px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(124, 58, 237, 0.2);
+        }
+
+        .leaderboard-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .leaderboard-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 8px;
+            border-bottom: 1px solid rgba(124, 58, 237, 0.2);
+            transition: background-color 0.2s ease;
+        }
+
+        .leaderboard-item:hover {
+            background-color: rgba(124, 58, 237, 0.1);
+        }
+
+        .leaderboard-item:last-child {
+            border-bottom: none;
+        }
+
+        .leaderboard-rank {
+            min-width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 10px;
+            position: relative;
+        }
+
+        .rank-lottie {
+            width: 40px;
+            height: 40px;
+        }
+
+        .rank-number {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-weight: bold;
+            color: white;
+        }
+
+        .leaderboard-user {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .leaderboard-name {
+            font-weight: 500;
+        }
+
+        .leaderboard-id {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .leaderboard-stats {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+        }
+
+        .leaderboard-refers {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .leaderboard-reward {
+            font-weight: bold;
+            color: var(--success-color);
+        }
+
+        .leaderboard-notice {
+            font-size: 14px;
+            color: var(--text-secondary);
+            text-align: center;
+            margin-top: 16px;
+        }
+
+        .swal2-popup {
+            background: var(--bg-color) !important;
+            color: var(--text-color) !important;
+            border: 1px solid rgba(124, 58, 237, 0.2) !important;
+            backdrop-filter: blur(10px) !important;
+            width: 90vw !important;
+            max-width: 400px !important;
+        }
+
+        @media (max-width: 480px) {
+            .app-content {
+                padding: 16px;
+                padding-top: calc(80px + env(safe-area-inset-top));
+            }
+
+            .loading-lottie {
+                width: 180px;
+                height: 180px;
+            }
+
+            .no-referrals-lottie {
+                width: 160px;
+                height: 160px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="app-header">
+        <div class="header-content">
+            <h1 class="header-title">SHIBAdEarner</h1>
+            <img src="https://upload.wikimedia.org/wikipedia/commons/e/e4/Twitter_Verified_Badge.svg" alt="Verified" class="verified-icon" id="verified-icon">
+        </div>
+    </header>
+
+    <div class="loading-container" id="loading-container">
+        <div id="refer-load-lottie" class="loading-lottie"></div>
+        <p class="loading-text">Loading your referral stats...</p>
+    </div>
+
+    <div class="app-content" style="display: none;">
+        <div class="referral-link-section">
+            <h2 class="section-title">Your Referral Link</h2>
+             <h3 class="section-title">Earn 500 SHIB For Each Referral</h3>
+            <div class="referral-link-container">
+                <span class="referral-link" id="referral-link">—</span>
+                <button class="copy-btn" id="copy-btn">
+                    <i class="fas fa-copy"></i>
+                </button>
+            </div>
+        </div>
+
+        <div class="referrals-section">
+            <h2 class="section-title">My Referrals</h2>
+            <div class="referral-count" id="referral-count">Total Referrals: 0</div>
+            <div class="referral-list" id="referral-list">
+                <div class="no-referrals" id="no-referrals">
+                    <div id="no-referrals-lottie" class="no-referrals-lottie"></div>
+                    <p>No referrals yet. Share your link to start earning!</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="leaderboard-section">
+            <h2 class="section-title">Leaderboard</h2>
+            <div class="leaderboard-list" id="leaderboard-list"></div>
+            <p class="leaderboard-notice">Leaderboard rewards are distributed every Sunday, and referrals will be reset.</p>
+        </div>
+    </div>
+
+    <script>
+        // Initialize Telegram WebApp
+        const tg = window.Telegram.WebApp;
+        tg.backgroundColor = '#121212';
+        tg.headerColor = '#121212';
+        tg.expand();
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set verified icon
+            document.getElementById('verified-icon').src = 'https://upload.wikimedia.org/wikipedia/commons/e/e4/Twitter_Verified_Badge.svg';
+
+            // Show loading animation for 3 seconds
+            lottie.loadAnimation({
+                container: document.getElementById('refer-load-lottie'),
+                renderer: 'svg',
+                loop: true,
+                autoplay: true,
+                path: 'refer-load.json'
+            });
+
+            setTimeout(() => {
+                document.getElementById('loading-container').style.display = 'none';
+                document.querySelector('.app-content').style.display = 'flex';
+                fetchReferrals();
+            }, 3000);
+
+            // Extract user data from Telegram
+            const user = tg.initDataUnsafe.user || {};
+            const userId = user.id || 0;
+            const initData = tg.initData;
+
+            async function fetchReferrals() {
+                try {
+                    const response = await fetch('api/referrals.php', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            user_id: userId,
+                            init_data: initData
+                        })
+                    });
+
+                    const data = await response.json();
+
+                    if (data.ok) {
+                        // Update referral link
+                        const referralLink = `https://t.me/${data.user_details.bot_username.replace('@', '')}?startapp=${data.user_details.user_id}`;
+                        document.getElementById('referral-link').textContent = referralLink;
+
+                        // Update referral count and list
+                        const totalRefer = data.user_details.total_refer || 0;
+                        document.getElementById('referral-count').textContent = `Total Referrals: ${totalRefer}`;
+
+                        const referralList = document.getElementById('referral-list');
+                        if (data.referrals && data.referrals.length > 0) {
+                            document.getElementById('no-referrals').style.display = 'none';
+                            data.referrals.forEach(referral => {
+                                const referralItem = document.createElement('div');
+                                referralItem.className = 'referral-item';
+                                referralItem.innerHTML = `
+                                    <span>ID: ${referral.user_id}</span>
+                                    <span>${referral.date}</span>
+                                `;
+                                referralList.appendChild(referralItem);
+                            });
+                        } else {
+                            lottie.loadAnimation({
+                                container: document.getElementById('no-referrals-lottie'),
+                                renderer: 'svg',
+                                loop: true,
+                                autoplay: true,
+                                path: 'no-refers.json'
+                            });
+                        }
+
+                        // Update leaderboard with Lottie animations for top 3
+                        const leaderboardList = document.getElementById('leaderboard-list');
+                        if (data.top_referrers && data.top_referrers.length > 0) {
+                            data.top_referrers.forEach((referrer, index) => {
+                                const leaderboardItem = document.createElement('div');
+                                leaderboardItem.className = 'leaderboard-item';
+                                
+                                const totalRefers = referrer.total_refer || 0;
+                                const bonus = referrer.bonus || 0;
+                                
+                                // Create the rank element with appropriate Lottie animation for top 3
+                                let rankElement = '';
+                                
+                                if (index < 3) {
+                                    // For top 3, use Lottie animations
+                                    const rankJsonFile = index === 0 ? 'first.json' : (index === 1 ? 'second.json' : 'third.json');
+                                    rankElement = `
+                                        <div class="leaderboard-rank">
+                                            <div id="rank-lottie-${index}" class="rank-lottie"></div>
+                                        </div>
+                                    `;
+                                } else {
+                                    // For others, use standard number display
+                                    rankElement = `
+                                        <div class="leaderboard-rank">
+                                            <span class="rank-number">${index + 1}</span>
+                                        </div>
+                                    `;
+                                }
+                                
+                                leaderboardItem.innerHTML = `
+                                    ${rankElement}
+                                    <div class="leaderboard-user">
+                                        <span class="leaderboard-name">${referrer.name}</span>
+                                        <span class="leaderboard-id">ID: ${referrer.user_id}</span>
+                                    </div>
+                                    <div class="leaderboard-stats">
+                                        <span class="leaderboard-refers">${totalRefers} Referrals</span>
+                                        <span class="leaderboard-reward">${bonus} Reward</span>
+                                    </div>
+                                `;
+                                leaderboardList.appendChild(leaderboardItem);
+                                
+                                // Load Lottie animations for top 3 ranks after DOM elements are created
+                                if (index < 3) {
+                                    const rankJsonFile = index === 0 ? 'first.json' : (index === 1 ? 'second.json' : 'third.json');
+                                    lottie.loadAnimation({
+                                        container: document.getElementById(`rank-lottie-${index}`),
+                                        renderer: 'svg',
+                                        loop: true,
+                                        autoplay: true,
+                                        path: `${rankJsonFile}`
+                                    });
+                                }
+                            });
+                        } else {
+                            leaderboardList.innerHTML = '<p class="no-referrals">No leaderboard data available.</p>';
+                        }
+
+                        // Setup copy button with fixed clipboard functionality
+                        document.getElementById('copy-btn').addEventListener('click', () => {
+                            const tempInput = document.createElement('input');
+                            tempInput.value = referralLink;
+                            document.body.appendChild(tempInput);
+                            tempInput.select();
+                            
+                            try {
+                                document.execCommand('copy');
+                                showCopySuccess();
+                            } catch (err) {
+                                // Fallback for modern browsers
+                                navigator.clipboard.writeText(referralLink)
+                                    .then(() => {
+                                        showCopySuccess();
+                                    })
+                                    .catch(err => {
+                                        console.error('Copy failed:', err);
+                                        showCopyError();
+                                    });
+                            }
+                            
+                            document.body.removeChild(tempInput);
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: data.message || 'Failed to load referral data.',
+                            confirmButtonColor: 'var(--primary-color)',
+                            background: 'var(--bg-color)',
+                            color: 'var(--text-color)'
+                        });
+                    }
+                } catch (error) {
+                    console.error('Error fetching referrals:', error);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Connection Error',
+                        text: 'Failed to connect to the server. Please try again.',
+                        confirmButtonColor: 'var(--primary-color)',
+                        background: 'var(--bg-color)',
+                        color: 'var(--text-color)'
+                    });
+                }
+            }
+            
+            function showCopySuccess() {
+                Swal.fire({
+                    html: `
+                        <div id="copied-lottie" style="width: 100px; height: 100px; margin: 0 auto;"></div>
+                        <p style="color: var(--text-color); margin-top: 10px;">Copied successfully!</p>
+                    `,
+                    showConfirmButton: false,
+                    background: 'var(--bg-color)',
+                    color: 'var(--text-color)',
+                    backdrop: 'rgba(0,0,0,0.8)',
+                    timer: 4000,
+                    didOpen: () => {
+                        lottie.loadAnimation({
+                            container: document.getElementById('copied-lottie'),
+                            renderer: 'svg',
+                            loop: false,
+                            autoplay: true,
+                            path: 'copied.json'
+                        });
+                    }
+                });
+            }
+            
+            function showCopyError() {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Copy Failed',
+                    text: 'Unable to copy the link. Please try again.',
+                    confirmButtonColor: 'var(--primary-color)',
+                    background: 'var(--bg-color)',
+                    color: 'var(--text-color)'
+                });
+            }
+        });
+
+        function redirect(url, vibrate) {
+            if (vibrate && navigator.vibrate) navigator.vibrate(7);
+            window.location.href = url;
+        }
+
+        navFooter.add(
+            {
+                theme: 'dark',
+                selectedColor: '#7c3aed'
+            },
+            [
+                {
+                    name: "TASK",
+                    icon: "fa-tasks",
+                    onClick: (e) => redirect("index.html", true)
+                },
+                {
+                    name: "CARDS",
+                    icon: "fa-credit-card",
+                    onClick: (e) => redirect("cards.html", true)
+                },
+                {
+                    name: "INVITE",
+                    icon: "fa-user-plus",
+                    selected: true,
+                    onClick: (e) => redirect("refers.html", true)
+                },
+                {
+                    name: "WITHDRAW",
+                    icon: "fa-money-bill",
+                    onClick: (e) => redirect("withdraw.html", true)
+                },
+                {
+                    name: "MY TASK",
+                    icon: "fa-server",
+                    onClick: (e) => redirect("mytask.html", true)
+                }
+            ]
+        );
+    </script>
+</body>
+</html>

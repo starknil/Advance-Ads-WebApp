@@ -1,0 +1,906 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Scratch Rewards - Cards</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Ubuntu:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500;1,700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://unpkg.com/lottie-web@5.12.2/build/player/lottie.min.js"></script>
+    <script src="https://clients.tgbro.link/shop/api/nav-footer.js"></script>
+    <style>
+        :root {
+            --bg-color: #121212;
+            --primary-color: #7c3aed;
+            --primary-light: rgba(124, 58, 237, 0.1);
+            --secondary-color: #4e2c94;
+            --text-color: #e0e0e0;
+            --text-secondary: #a0a0a0;
+            --success-color: #10b981;
+            --error-color: #ef4444;
+            --card-bg: rgba(124, 58, 237, 0.15);
+            --task-bg: rgba(30, 30, 30, 0.8);
+            --button-color: #7c3aed;
+            --button-hover: #6b21a8;
+            --silver-color: #c0c0c0;
+            --gold-color: #ffd700;
+            --diamond-color: #b9f2ff;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            width: 100%;
+            max-width: 100vw;
+            overflow-x: hidden;
+            font-family: 'Ubuntu', sans-serif;
+            background: var(--bg-color);
+            color: var(--text-color);
+            min-height: 100vh;
+            display: flex;
+            padding-bottom: 50px;
+            padding-top: 10px;
+            flex-direction: column;
+            position: relative;
+            user-select: none;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            25% { transform: scale(1.05); }
+            50% { transform: scale(1.1); }
+            75% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .app-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            padding-top: 50px;
+            padding-bottom: 20px;
+            background: rgba(18, 18, 18, 0.8);
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            border-bottom: 1px solid rgba(124, 58, 237, 0.3);
+        }
+
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 16px;
+        }
+
+        .header-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text-color);
+            margin-right: 8px;
+        }
+
+        .verified-icon {
+            width: 20px;
+            height: 20px;
+        }
+
+        .app-content {
+            padding: 24px;
+            width: 100%;
+            max-width: 500px;
+            margin: 0 auto;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+            margin-top: 20px;
+        }
+
+        .user-info-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(124, 58, 237, 0.2);
+        }
+
+        .claim-gift-btn {
+            background: var(--button-color);
+            color: var(--text-color);
+            border: none;
+            border-radius: 8px;
+            padding: 8px 16px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.3s ease;
+            align-self: flex-end;
+        }
+
+        .claim-gift-btn:hover {
+            background: var(--button-hover);
+        }
+
+        .user-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            text-align: center;
+        }
+
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .stat-value {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text-color);
+        }
+
+        .balance-value {
+            color: var(--success-color);
+        }
+
+        .card-count-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .card-icon {
+            margin-right: 6px;
+            color: var(--primary-color);
+        }
+
+        .cards-section {
+            background: var(--task-bg);
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: var(--text-color);
+            border-bottom: 1px solid rgba(124, 58, 237, 0.3);
+            padding-bottom: 10px;
+        }
+
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+
+        .card-item {
+            cursor: pointer;
+            border-radius: 10px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(124, 58, 237, 0.1);
+            aspect-ratio: 1 / 1;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .card-item:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .card-silver, .card-gold, .card-diamond {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 10px;
+        }
+
+        .card-silver {
+            background: linear-gradient(135deg, #c0c0c0, #e8e8e8, #c0c0c0);
+        }
+
+        .card-gold {
+            background: linear-gradient(135deg, #d4af37, #ffd700, #d4af37);
+        }
+
+        .card-diamond {
+            background: linear-gradient(135deg, #b9f2ff, #e2faff, #b9f2ff);
+        }
+
+        .card-icon-large {
+            font-size: 36px;
+            margin-bottom: 10px;
+        }
+
+        .card-silver .card-icon-large {
+            color: #333;
+        }
+
+        .card-gold .card-icon-large {
+            color: #8B4513;
+        }
+
+        .card-diamond .card-icon-large {
+            color: #4169E1;
+        }
+
+        .card-type {
+            font-size: 18px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .card-silver .card-type {
+            color: #333;
+        }
+        
+        .card-gold .card-type {
+            color: #8B4513;
+        }
+        
+        .card-diamond .card-type {
+            color: #4169E1;
+        }
+
+        .card-shimmer {
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, 
+                rgba(255, 255, 255, 0) 0%, 
+                rgba(255, 255, 255, 0.2) 50%, 
+                rgba(255, 255, 255, 0) 100%);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            to {
+                left: 100%;
+            }
+        }
+
+        .no-cards {
+            text-align: center;
+            color: var(--text-secondary);
+            padding: 20px 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .no-cards-lottie {
+            width: 200px;
+            height: 200px;
+        }
+
+        .loading {
+            display: none;
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid var(--primary-light);
+            border-top-color: var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .swal2-popup {
+            background: var(--bg-color) !important;
+            color: var(--text-color) !important;
+            border: 1px solid rgba(124, 58, 237, 0.2) !important;
+            backdrop-filter: blur(10px) !important;
+            width: 90vw !important;
+            max-width: 400px !important;
+        }
+
+        .swal2-confirm {
+            background-color: var(--primary-color) !important;
+        }
+
+        .scratch-container {
+            position: relative;
+            width: 90vw;
+            max-width: 300px;
+            aspect-ratio: 1 / 1;
+            margin: 0 auto;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .scratch-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 2;
+            cursor: pointer;
+            border-radius: 12px;
+        }
+
+        .scratch-background {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 1;
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .scratch-silver {
+            background: linear-gradient(135deg, #c0c0c0, #e8e8e8, #c0c0c0);
+        }
+
+        .scratch-gold {
+            background: linear-gradient(135deg, #d4af37, #ffd700, #d4af37);
+        }
+
+        .scratch-diamond {
+            background: linear-gradient(135deg, #b9f2ff, #e2faff, #b9f2ff);
+        }
+
+        .scratch-card-logo {
+            font-size: 50px;
+            margin-bottom: 15px;
+        }
+
+        .scratch-silver .scratch-card-logo {
+            color: #333;
+        }
+
+        .scratch-gold .scratch-card-logo {
+            color: #8B4513;
+        }
+
+        .scratch-diamond .scratch-card-logo {
+            color: #4169E1;
+        }
+
+        .scratch-card-text {
+            font-size: 22px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .scratch-silver .scratch-card-text {
+            color: #333;
+        }
+        
+        .scratch-gold .scratch-card-text {
+            color: #8B4513;
+        }
+        
+        .scratch-diamond .scratch-card-text {
+            color: #4169E1;
+        }
+
+        .scratch-reveal {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            color: var(--text-color);
+            font-size: 24px;
+            font-weight: 700;
+            z-index: 0;
+            width: 100%;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .scratch-amount {
+            font-size: 28px;
+            color: var(--success-color);
+            margin-top: 8px;
+        }
+
+        .refer-message {
+            font-size: 16px;
+            line-height: 1.5;
+            margin-top: 15px;
+            color: var(--text-secondary);
+        }
+
+        .scratch-instruction {
+            text-align: center;
+            margin-top: 10px;
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        @media (max-width: 480px) {
+            .app-content {
+                padding: 16px;
+                padding-top: calc(80px + env(safe-area-inset-top));
+            }
+
+            .user-stats {
+                gap: 8px;
+            }
+
+            .stat-value {
+                font-size: 18px;
+            }
+
+            .scratch-container {
+                max-width: 280px;
+            }
+
+            .no-cards-lottie {
+                width: 180px;
+                height: 180px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="app-header">
+        <div class="header-content">
+            <h1 class="header-title">SHIBAAdEarner</h1>
+            <img src="https://upload.wikimedia.org/wikipedia/commons/e/e4/Twitter_Verified_Badge.svg" alt="Verified" class="verified-icon" id="verified-icon">
+        </div>
+    </header>
+
+    <div class="app-content">
+        <!-- <button class="claim-gift-btn" onclick="redirect('claim-gift.html', true)">Claim Gift</button> -->
+        <div class="user-info-card">
+            <div class="user-stats">
+                <div class="stat-item">
+                    <div class="stat-label">ID</div>
+                    <div class="stat-value" id="user-id">—</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">BALANCE</div>
+                    <div class="stat-value balance-value">
+                        <span id="user-balance">—</span> <span id="currency">SHIB</span>
+                    </div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">CARDS</div>
+                    <div class="stat-value card-count-container">
+                        <i class="fas fa-ticket-alt card-icon"></i>
+                        <span id="card-count">—</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="cards-section" class="cards-section" style="display: none;">
+            <h2 class="section-title">Available Scratch Cards</h2>
+            <div class="card-grid" id="card-grid">
+                <div class="loading" id="loading">
+                    <div class="spinner"></div>
+                    <p>Loading cards...</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="no-cards-container" style="display: none;">
+            <div class="no-cards">
+                <div id="no-cards-lottie" class="no-cards-lottie"></div>
+                <p class="refer-message">Refer your friends to get more scratch cards!</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize Telegram WebApp
+        const tg = window.Telegram.WebApp;
+        tg.backgroundColor = '#121212';
+        tg.headerColor = '#121212';
+        tg.expand();
+
+        let currentUserId = null;
+        let currentInitData = null;
+
+        // Card design info for each type
+        const cardDesigns = {
+            silver: {
+                icon: 'fa-solid fa-medal',
+                name: 'Silver'
+            },
+            gold: {
+                icon: 'fa-solid fa-crown',
+                name: 'Gold'
+            },
+            diamond: {
+                icon: 'fa-solid fa-gem',
+                name: 'Diamond'
+            }
+        };
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const user = tg.initDataUnsafe.user || {};
+            currentUserId = user.id || 0;
+            currentInitData = tg.initData;
+
+            // Set verified icon
+            document.getElementById('verified-icon').src = 'https://upload.wikimedia.org/wikipedia/commons/e/e4/Twitter_Verified_Badge.svg';
+
+            // Fetch dashboard data
+            fetchDashboard();
+        });
+
+        async function fetchDashboard() {
+            const loading = document.getElementById('loading');
+            loading.style.display = 'block';
+
+            try {
+                const response = await fetch('api/dashboard.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        user_id: currentUserId,
+                        init_data: currentInitData
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.ok) {
+                    // Update user info
+                    document.getElementById('user-id').textContent = data.user_details.user_id || '—';
+                    document.getElementById('user-balance').textContent = data.user_details.balance || '0.00';
+                    document.getElementById('currency').textContent = data.currency || 'SHIB';
+
+                    // Update card count
+                    const cardCount = data.scratch_card ? data.scratch_card.length : 0;
+                    document.getElementById('card-count').textContent = cardCount;
+
+                    // Show or hide sections based on card availability
+                    if (cardCount > 0) {
+                        document.getElementById('cards-section').style.display = 'block';
+                        document.getElementById('no-cards-container').style.display = 'none';
+                        renderCards(data.scratch_card || []);
+                    } else {
+                        document.getElementById('cards-section').style.display = 'none';
+                        document.getElementById('no-cards-container').style.display = 'block';
+                        
+                        // Load Lottie animation for no cards
+                        lottie.loadAnimation({
+                            container: document.getElementById('no-cards-lottie'),
+                            renderer: 'svg',
+                            loop: true,
+                            autoplay: true,
+                            path: 'no-cards.json'
+                        });
+                    }
+                } else {
+                    if (data.message === 'User not found') {
+                        window.location.href = 'register.html';
+                    } else {
+                        showError('Error', data.message || 'Failed to load data.');
+                    }
+                }
+            } catch (error) {
+                console.error('Error fetching dashboard:', error);
+                showError('Connection Error', 'Failed to connect to the server. Please try again.');
+            } finally {
+                loading.style.display = 'none';
+            }
+        }
+
+        function renderCards(cards) {
+            const cardGrid = document.getElementById('card-grid');
+            cardGrid.innerHTML = ''; // Clear previous cards
+
+            if (!cards || cards.length === 0) {
+                return; // This case is handled separately now
+            }
+
+            cards.forEach(card => {
+                const cardElement = document.createElement('div');
+                cardElement.className = 'card-item';
+                const cardType = card.card_type.toLowerCase();
+                const cardDesign = cardDesigns[cardType] || cardDesigns.silver;
+
+                cardElement.innerHTML = `
+                    <div class="card-${cardType}">
+                        <i class="${cardDesign.icon} card-icon-large"></i>
+                        <div class="card-type">${cardDesign.name}</div>
+                        <div class="card-shimmer"></div>
+                    </div>
+                `;
+
+                cardGrid.appendChild(cardElement);
+
+                cardElement.addEventListener('click', () => {
+                    scratchCard(card.card_id, cardType);
+                });
+            });
+        }
+
+        async function scratchCard(cardId, cardType) {
+            try {
+                const response = await fetch('api/scratch.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        user_id: currentUserId,
+                        init_data: currentInitData,
+                        card_id: cardId
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.ok) {
+                    showScratchPopup(cardType, data.amount, data.message);
+                } else {
+                    showError('Error', data.message || 'Failed to scratch card.');
+                    fetchDashboard(); // Refresh to remove invalid card
+                }
+            } catch (error) {
+                console.error('Error scratching card:', error);
+                showError('Connection Error', 'Failed to connect to the server. Please try again.');
+                fetchDashboard();
+            }
+        }
+
+        function showScratchPopup(cardType, amount, message) {
+            const cardDesign = cardDesigns[cardType.toLowerCase()] || cardDesigns.silver;
+
+            Swal.fire({
+                title: 'Scratch Your Card!',
+                html: `
+                    <div class="scratch-container">
+                        <canvas class="scratch-canvas"></canvas>
+                        <div class="scratch-background scratch-${cardType}">
+                            <i class="${cardDesign.icon} scratch-card-logo"></i>
+                            <div class="scratch-card-text">${cardDesign.name}</div>
+                        </div>
+                        <div class="scratch-reveal">
+                            Congratulations!<br>
+                            <div class="scratch-amount">${amount} SHIB</div>
+                        </div>
+                    </div>
+                    <div class="scratch-instruction">Scratch the card to reveal your prize!</div>
+                `,
+                showConfirmButton: false,
+                background: 'var(--bg-color)',
+                color: 'var(--text-color)',
+                backdrop: `rgba(0,0,0,0.8)`,
+                allowOutsideClick: false,
+                didOpen: () => {
+                    const canvas = document.querySelector('.scratch-canvas');
+                    const ctx = canvas.getContext('2d');
+                    const container = document.querySelector('.scratch-container');
+
+                    // Set canvas size to match container
+                    canvas.width = container.offsetWidth;
+                    canvas.height = container.offsetWidth; // Square aspect ratio
+
+                    // Create a radial gradient as the scratch overlay
+                    const gradient = ctx.createRadialGradient(
+                        canvas.width / 2, canvas.height / 2, 0,
+                        canvas.width / 2, canvas.height / 2, canvas.width / 2
+                    );
+                    
+                    if (cardType === 'silver') {
+                        gradient.addColorStop(0, '#d9d9d9');
+                        gradient.addColorStop(1, '#a0a0a0');
+                    } else if (cardType === 'gold') {
+                        gradient.addColorStop(0, '#ffd700');
+                        gradient.addColorStop(1, '#d4af37');
+                    } else if (cardType === 'diamond') {
+                        gradient.addColorStop(0, '#e2faff');
+                        gradient.addColorStop(1, '#b9f2ff');
+                    }
+                    
+                    ctx.fillStyle = gradient;
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+                    
+                    // Add some texture/pattern to make it look like a scratch card
+                    for (let i = 0; i < 3000; i++) {
+                        ctx.beginPath();
+                        ctx.arc(
+                            Math.random() * canvas.width,
+                            Math.random() * canvas.height,
+                            Math.random() * 2,
+                            0,
+                            Math.PI * 2
+                        );
+                        ctx.fillStyle = 'rgba(255, 255, 255, 0.1)';
+                        ctx.fill();
+                    }
+
+                    // Draw scratch to reveal text
+                    ctx.font = '16px Ubuntu';
+                    ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+                    ctx.textAlign = 'center';
+                    ctx.fillText('SCRATCH HERE', canvas.width / 2, canvas.height / 2);
+
+                    // Scratch effect
+                    ctx.globalCompositeOperation = 'destination-out';
+                    ctx.lineWidth = 40; // Wider brush for easier scratching
+                    ctx.lineCap = 'round';
+
+                    let isScratching = false;
+                    let scratchedPixels = 0;
+                    let totalPixels = canvas.width * canvas.height;
+                    let lastCheck = 0;
+                    let autoRevealTimeout = null;
+
+                    function startScratch(e) {
+                        isScratching = true;
+                        scratch(e);
+                    }
+
+                    function stopScratch() {
+                        isScratching = false;
+                    }
+
+                    function scratch(e) {
+                        if (!isScratching) return;
+                        e.preventDefault(); // Prevent scrolling on touch
+                        const rect = canvas.getBoundingClientRect();
+                        const x = (e.clientX || (e.touches && e.touches[0] ? e.touches[0].clientX : 0)) - rect.left;
+                        const y = (e.clientY || (e.touches && e.touches[0] ? e.touches[0].clientY : 0)) - rect.top;
+                        
+                        // Only scratch if we have valid coordinates
+                        if (x > 0 && y > 0) {
+                            ctx.beginPath();
+                            ctx.moveTo(x, y);
+                            ctx.lineTo(x + 0.1, y + 0.1);
+                            ctx.stroke();
+
+                            // Check scratched percentage periodically
+                            if (Date.now() - lastCheck > 100) {
+                                checkScratchedPercentage();
+                                lastCheck = Date.now();
+                            }
+                        }
+                    }
+
+                    function checkScratchedPercentage() {
+                        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                        scratchedPixels = 0;
+                        for (let i = 3; i < imageData.data.length; i += 4) {
+                            if (imageData.data[i] === 0) scratchedPixels++;
+                        }
+                        const scratchedPercentage = (scratchedPixels / (totalPixels / 4)) * 100;
+                        if (scratchedPercentage >= 60) {
+                            // Auto-reveal the rest of the card after 60% scratched
+                            if (autoRevealTimeout === null) {
+                                autoRevealTimeout = setTimeout(() => {
+                                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                                    
+                                    // Update popup to show reward and close after a delay
+                                    Swal.update({
+                                        title: 'Congratulations! 🎉',
+                                        html: `
+                                            <div style="font-size: 24px; margin-bottom: 10px;">You won</div>
+                                            <div style="font-size: 32px; color: var(--success-color); margin-bottom: 20px;">${amount} SHIB</div>
+                                            <div style="color: var(--text-secondary);">${message || 'Your reward has been added to your balance!'}</div>
+                                        `,
+                                        showConfirmButton: false,
+                                        allowOutsideClick: true
+                                    });
+
+                                    // Automatically close popup and refresh dashboard after 2 seconds
+                                    setTimeout(() => {
+                                        Swal.close();
+                                        location.reload();
+                                    }, 2000);
+                                }, 300);
+                            }
+                        }
+                    }
+
+                    canvas.addEventListener('mousedown', startScratch);
+                    canvas.addEventListener('mousemove', scratch);
+                    canvas.addEventListener('mouseup', stopScratch);
+                    canvas.addEventListener('touchstart', startScratch);
+                    canvas.addEventListener('touchmove', scratch);
+                    canvas.addEventListener('touchend', stopScratch);
+                }
+            });
+        }
+
+        function showError(title, text) {
+            Swal.fire({
+                icon: 'error',
+                title: title,
+                text: text,
+                confirmButtonColor: 'var(--primary-color)',
+                background: 'var(--bg-color)',
+                color: 'var(--text-color)'
+            });
+        }
+        
+        function redirect(url, vibrate) {
+            if (vibrate && navigator.vibrate) navigator.vibrate(7);
+            window.location.href = url;
+        }
+        
+        navFooter.add(
+            {
+                theme: 'dark',
+                selectedColor: '#7c3aed'
+            },
+            [
+                {
+                    name: "TASK",
+                    icon: "fa-tasks",
+                    onClick: (e) => redirect("index.html", true)
+                },
+                {
+                    name: "CARDS",
+                    icon: "fa-id-card",
+                    selected: true,
+                    onClick: (e) => redirect("cards.html", true)
+                },
+                {
+                    name: "INVITE",
+                    icon: "fa-user-plus",
+                    onClick: (e) => redirect("refers.html", true)
+                },
+                {
+                    name: "WITHDRAW",
+                    icon: "fa-money-bill",
+                    onClick: (e) => redirect("withdraw.html", true)
+                },
+                {
+                    name: "MY TASK",
+                    icon: "fa-server",
+                    onClick: (e) => redirect("mytask.html", true)
+                }
+            ]
+        );
+    </script>
+</body>
+</html>

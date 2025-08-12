@@ -1,0 +1,1094 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diamond Card - Premium Telegram Mini App Script</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            overflow-x: hidden;
+            background: #0a0a0a;
+            color: #ffffff;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Animated Background */
+        .bg-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, #1a1a2e, #16213e, #0f3460);
+            z-index: -2;
+        }
+
+        .bg-animation::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><radialGradient id="grad" cx="50%" cy="50%" r="50%"><stop offset="0%" style="stop-color:%23ff6b6b;stop-opacity:0.3" /><stop offset="100%" style="stop-color:%23transparent" /></radialGradient></defs><circle cx="20" cy="20" r="2" fill="url(%23grad)"><animate attributeName="cy" values="20;80;20" dur="3s" repeatCount="indefinite"/></circle><circle cx="80" cy="80" r="2" fill="url(%23grad)"><animate attributeName="cy" values="80;20;80" dur="3s" repeatCount="indefinite"/></circle></svg>') repeat;
+            opacity: 0.1;
+            animation: float 10s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+
+        /* Header */
+        .header {
+            background: rgba(10, 10, 10, 0.95);
+            backdrop-filter: blur(20px);
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            padding: 1rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #fff;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .diamond-icon {
+            width: 45px;
+            height: 45px;
+            background: linear-gradient(45deg, #ff6b6b, #ffd93d, #4ecdc4);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: rotate 4s linear infinite;
+            box-shadow: 0 0 20px rgba(255, 107, 107, 0.5);
+        }
+
+        @keyframes rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 12px 30px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 1rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, #ff6b6b, #ffd93d);
+            color: white;
+            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(255, 107, 107, 0.6);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(45deg, #4ecdc4, #44a08d);
+            color: white;
+            box-shadow: 0 4px 15px rgba(78, 205, 196, 0.4);
+        }
+
+        .btn-secondary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(78, 205, 196, 0.6);
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: #fff;
+            border: 2px solid #ff6b6b;
+        }
+
+        .btn-outline:hover {
+            background: #ff6b6b;
+            transform: translateY(-2px);
+        }
+
+        /* Hero Section */
+        .hero {
+            padding: 150px 0 100px;
+            text-align: center;
+            position: relative;
+            background: linear-gradient(135deg, rgba(255, 107, 107, 0.1), rgba(78, 205, 196, 0.1));
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+        }
+
+        .hero h1 {
+            font-size: 4rem;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(45deg, #ffd93d, #ff6b6b, #4ecdc4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 800;
+            line-height: 1.2;
+        }
+
+        .hero .subtitle {
+            font-size: 1.4rem;
+            margin-bottom: 1rem;
+            color: #ff6b6b;
+            font-weight: 600;
+        }
+
+        .hero .description {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            line-height: 1.8;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 2rem;
+        }
+
+        .floating-elements {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .floating-card {
+            position: absolute;
+            width: 80px;
+            height: 100px;
+            background: linear-gradient(45deg, #ff6b6b, #ffd93d);
+            border-radius: 12px;
+            animation: floatCard 8s ease-in-out infinite;
+            opacity: 0.2;
+            box-shadow: 0 10px 30px rgba(255, 107, 107, 0.3);
+        }
+
+        .floating-card:nth-child(1) { left: 5%; top: 15%; animation-delay: 0s; }
+        .floating-card:nth-child(2) { right: 10%; top: 25%; animation-delay: 2s; }
+        .floating-card:nth-child(3) { left: 15%; bottom: 15%; animation-delay: 4s; }
+        .floating-card:nth-child(4) { right: 5%; bottom: 25%; animation-delay: 6s; }
+
+        @keyframes floatCard {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-30px) rotate(10deg); }
+        }
+
+        /* Value Proposition */
+        .value-prop {
+            padding: 80px 0;
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .value-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .value-card {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 2rem;
+            border-radius: 20px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .value-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(255, 107, 107, 0.2);
+            border-color: #ff6b6b;
+        }
+
+        .value-icon {
+            font-size: 3rem;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(45deg, #ff6b6b, #ffd93d);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* Section Titles */
+        .section-title {
+            text-align: center;
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(45deg, #ffd93d, #ff6b6b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 700;
+        }
+
+        .section-subtitle {
+            text-align: center;
+            font-size: 1.2rem;
+            margin-bottom: 3rem;
+            opacity: 0.8;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* Features Section */
+        .features {
+            padding: 100px 0;
+            background: linear-gradient(135deg, rgba(255, 107, 107, 0.05), rgba(78, 205, 196, 0.05));
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2.5rem;
+            margin-top: 4rem;
+        }
+
+        .feature-card {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 2.5rem;
+            border-radius: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.4s ease;
+            backdrop-filter: blur(15px);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 107, 107, 0.1), transparent);
+            transition: all 0.6s ease;
+        }
+
+        .feature-card:hover::before {
+            left: 100%;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-15px);
+            box-shadow: 0 25px 50px rgba(255, 107, 107, 0.3);
+            border-color: #ff6b6b;
+        }
+
+        .feature-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .feature-icon {
+            font-size: 2.5rem;
+            color: #ff6b6b;
+            width: 60px;
+        }
+
+        .feature-card h3 {
+            font-size: 1.5rem;
+            color: #fff;
+            font-weight: 600;
+        }
+
+        .feature-card p {
+            opacity: 0.9;
+            line-height: 1.7;
+            font-size: 1rem;
+        }
+
+        /* Screenshots Section */
+        .screenshots {
+            padding: 100px 0;
+            background: rgba(0, 0, 0, 0.3);
+        }
+
+        .screenshot-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            margin-top: 4rem;
+        }
+
+        .screenshot-section h3 {
+            font-size: 2rem;
+            margin-bottom: 2rem;
+            color: #ff6b6b;
+            text-align: center;
+        }
+
+        .screenshot-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .screenshot-item {
+            padding: 1.5rem;
+            border-radius: 20px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .screenshot-item:hover {
+            transform: scale(1.05);
+            box-shadow: 0 15px 30px rgba(255, 107, 107, 0.2);
+        }
+
+        .screenshot-item img {
+            width: 120%;
+            max-width: 230px;
+            height: auto;
+            margin-bottom: 1rem;
+        }
+
+        .screenshot-item h4 {
+            font-size: 1rem;
+            color: #fff;
+            font-weight: 500;
+        }
+
+        /* Admin Features */
+        .admin-features {
+            padding: 100px 0;
+            background: linear-gradient(135deg, rgba(78, 205, 196, 0.05), rgba(255, 107, 107, 0.05));
+        }
+
+        .admin-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .admin-card {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 2rem;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .admin-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(78, 205, 196, 0.2);
+            border-color: #4ecdc4;
+        }
+
+        .admin-card h4 {
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+            color: #4ecdc4;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .admin-card p {
+            opacity: 0.9;
+            line-height: 1.6;
+        }
+
+        /* Pricing Section */
+        .pricing {
+            padding: 100px 0;
+            background: rgba(0, 0, 0, 0.4);
+        }
+
+        .pricing-container {
+            max-width: 800px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .pricing-card {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 4rem;
+            border-radius: 30px;
+            border: 2px solid rgba(255, 107, 107, 0.3);
+            backdrop-filter: blur(20px);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .pricing-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255, 107, 107, 0.1), transparent);
+            animation: rotate 4s linear infinite;
+        }
+
+        .pricing-content {
+            position: relative;
+            z-index: 2;
+        }
+
+        .pricing-badge {
+            background: linear-gradient(45deg, #ff6b6b, #ffd93d);
+            color: white;
+            padding: 0.5rem 1.5rem;
+            border-radius: 25px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 2rem;
+            display: inline-block;
+        }
+
+        .pricing-title {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            color: #fff;
+        }
+
+        .pricing-features {
+            list-style: none;
+            margin: 2rem 0;
+            text-align: left;
+            max-width: 400px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .pricing-features li {
+            padding: 0.5rem 0;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .pricing-features li i {
+            color: #4ecdc4;
+            font-size: 1.2rem;
+        }
+
+        .contact-info {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 2rem;
+            border-radius: 20px;
+            margin: 2rem 0;
+        }
+
+        .contact-info h4 {
+            color: #ffd93d;
+            margin-bottom: 1rem;
+            font-size: 1.3rem;
+        }
+
+        /* Footer */
+        .footer {
+            background: rgba(0, 0, 0, 0.8);
+            padding: 4rem 0 2rem;
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 3rem;
+            margin-bottom: 2rem;
+        }
+
+        .footer-section h4 {
+            color: #ff6b6b;
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+        }
+
+        .footer-section p, .footer-section a {
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            line-height: 1.8;
+        }
+
+        .footer-section a:hover {
+            color: #ff6b6b;
+        }
+
+        .footer-bottom {
+            text-align: center;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 2.5rem; }
+            .section-title { font-size: 2rem; }
+            .features-grid { grid-template-columns: 1fr; }
+            .screenshot-container { grid-template-columns: 1fr; gap: 2rem; }
+            .hero-buttons { flex-direction: column; align-items: center; }
+            .btn { width: 100%; max-width: 300px; justify-content: center; }
+            .admin-grid { grid-template-columns: 1fr; }
+            .pricing-card { padding: 2rem; }
+        }
+
+        /* Animation Classes */
+        .fade-in-up {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.6s ease;
+        }
+
+        .fade-in-up.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Pulse animation for CTAs */
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(255, 107, 107, 0.7); }
+            70% { box-shadow: 0 0 0 15px rgba(255, 107, 107, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(255, 107, 107, 0); }
+        }
+
+        /* Highlight box */
+        .highlight-box {
+            background: linear-gradient(45deg, rgba(255, 107, 107, 0.1), rgba(255, 215, 61, 0.1));
+            border: 1px solid rgba(255, 107, 107, 0.3);
+            padding: 2rem;
+            border-radius: 20px;
+            margin: 2rem 0;
+            text-align: center;
+        }
+
+        .highlight-box h3 {
+            color: #ffd93d;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-animation"></div>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <nav class="nav">
+                <a href="#" class="logo">
+                    <div class="diamond-icon">
+                        <i class="fas fa-gem"></i>
+                    </div>
+                    Diamond Card
+                </a>
+                <div style="display: flex; gap: 1rem;">
+                    <a href="https://t.me/diamond_card_bot" class="btn btn-outline" target="_blank">
+                        <i class="fab fa-telegram"></i> Try Demo
+                    </a>
+                    <a href="#pricing" class="btn btn-primary pulse">
+                        <i class="fas fa-shopping-cart"></i> Buy Now
+                    </a>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="floating-elements">
+            <div class="floating-card"></div>
+            <div class="floating-card"></div>
+            <div class="floating-card"></div>
+            <div class="floating-card"></div>
+        </div>
+        <div class="container">
+            <div class="hero-content animate__animated animate__fadeInUp">
+                <div class="subtitle">
+                    <i class="fas fa-rocket"></i> Premium Telegram Mini App Script
+                </div>
+                <h1>Diamond Card Bot</h1>
+                <p class="description">
+                    Launch your own profitable scratch card Telegram mini app! Complete solution with advanced admin panel, 
+                    multiple card types, referral system, and real money withdrawals. Turn your Telegram channel into a 
+                    revenue-generating platform with our battle-tested script.
+                </p>
+                
+                <div class="highlight-box">
+                    <h3><i class="fas fa-gift"></i> Special Launch Offer</h3>
+                    <p>Get <strong>FREE SETUP & INSTALLATION</strong> + 30 days support when you purchase today!</p>
+                </div>
+
+                <div class="hero-buttons">
+                    <a href="https://t.me/diamond_card_bot" class="btn btn-secondary" target="_blank">
+                        <i class="fab fa-telegram"></i> Try Live Demo
+                    </a>
+                    <a href="https://t.me/arijitiyan" class="btn btn-primary pulse" target="_blank">
+                        <i class="fas fa-shopping-cart"></i> Purchase Script
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Value Proposition -->
+    <section class="value-prop">
+        <div class="container">
+            <h2 class="section-title">Why Choose Our Script?</h2>
+            <p class="section-subtitle">
+                Join hundreds of successful bot owners who are earning passive income with our proven system
+            </p>
+            <div class="value-grid">
+                <div class="value-card fade-in-up">
+                    <div class="value-icon"><i class="fas fa-rocket"></i></div>
+                    <h3>Ready to Deploy</h3>
+                    <p>Complete script with zero coding required. Launch in minutes!</p>
+                </div>
+                <div class="value-card fade-in-up">
+                    <div class="value-icon"><i class="fas fa-dollar-sign"></i></div>
+                    <h3>Proven Profitable</h3>
+                    <p>Tested revenue model with built-in monetization strategies</p>
+                </div>
+                <div class="value-card fade-in-up">
+                    <div class="value-icon"><i class="fas fa-tools"></i></div>
+                    <h3>Free Setup</h3>
+                    <p>We install and configure everything for you at no extra cost</p>
+                </div>
+                <div class="value-card fade-in-up">
+                    <div class="value-icon"><i class="fas fa-headset"></i></div>
+                    <h3>Full Support</h3>
+                    <p>30 days premium support included with every purchase</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features">
+        <div class="container">
+            <h2 class="section-title">Powerful User Features</h2>
+            <p class="section-subtitle">
+                Everything your users need for an engaging scratch card experience
+            </p>
+            <div class="features-grid">
+                <div class="feature-card fade-in-up">
+                    <div class="feature-header">
+                        <i class="fas fa-tasks feature-icon"></i>
+                        <h3>Task Completion System</h3>
+                    </div>
+                    <p>Users complete simple tasks to earn scratch cards. Fully customizable task types with automatic validation and reward distribution.</p>
+                </div>
+                
+                <div class="feature-card fade-in-up">
+                    <div class="feature-header">
+                        <i class="fas fa-users feature-icon"></i>
+                        <h3>Advanced Referral System</h3>
+                    </div>
+                    <p>Multi-level referral program with instant rewards. Users get random scratch cards for each successful referral with detailed tracking.</p>
+                </div>
+                
+                <div class="feature-card fade-in-up">
+                    <div class="feature-header">
+                        <i class="fas fa-gem feature-icon"></i>
+                        <h3>3 Premium Card Types</h3>
+                    </div>
+                    <p>Silver, Gold, and Diamond scratch cards with different prize pools. Each card type offers unique rewards and winning probabilities.</p>
+                </div>
+                
+                <div class="feature-card fade-in-up">
+                    <div class="feature-header">
+                        <i class="fas fa-trophy feature-icon"></i>
+                        <h3>Interactive Leaderboard</h3>
+                    </div>
+                    <p>Real-time leaderboard system with referral rankings, bonus distributions, and competitive elements to boost user engagement.</p>
+                </div>
+                
+                <div class="feature-card fade-in-up">
+                    <div class="feature-header">
+                        <i class="fas fa-money-bill-wave feature-icon"></i>
+                        <h3>Real Money Rewards</h3>
+                    </div>
+                    <p>Scratch cards reveal real money prizes that users can withdraw. Built-in fraud protection and minimum threshold controls.</p>
+                </div>
+                
+                <div class="feature-card fade-in-up">
+                    <div class="feature-header">
+                        <i class="fas fa-credit-card feature-icon"></i>
+                        <h3>Multiple Payment Methods</h3>
+                    </div>
+                    <p>Support for various withdrawal methods including PayPal, bank transfer, crypto, and digital wallets. Fully configurable limits.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Screenshots Section -->
+    <section class="screenshots">
+        <div class="container">
+            <h2 class="section-title">See It In Action</h2>
+            <p class="section-subtitle">
+                Real screenshots from live bot demonstrating user interface and admin panel
+            </p>
+            
+            <div class="screenshot-container">
+                <!-- User Screenshots -->
+                <div class="screenshot-section">
+                    <h3><i class="fas fa-mobile-alt"></i> User Experience</h3>
+                    <div class="screenshot-grid">
+                        <div class="screenshot-item fade-in-up">
+                            <img src="https://i.ibb.co/NdmqDc66/1000017264-portrait.png" alt="ss">
+                        </div>
+                        <div class="screenshot-item fade-in-up">
+                            <img src="https://i.ibb.co/s9h4Z7gt/1000017267-portrait.png" alt="ss">
+                        </div>
+                        <div class="screenshot-item fade-in-up">
+                            <img src="https://i.ibb.co/JFKfWTVG/1000017260-portrait.png" alt="ss">
+                        </div>
+                        <div class="screenshot-item fade-in-up">
+                            <img src="https://i.ibb.co/DfcTfgH7/1000017263-portrait.png" alt="ss">
+                        </div>
+                        <div class="screenshot-item fade-in-up">
+                            <img src="https://i.ibb.co/C5N05svp/1000017261-portrait.png" alt="ss">
+                        </div>
+                        <div class="screenshot-item fade-in-up">
+                            <img src="https://i.ibb.co/vxn1jQKK/1000017265-portrait.png" alt="ss">
+                        </div>
+                        <div class="screenshot-item fade-in-up">
+                            <img src="https://i.ibb.co/CprcJYsc/1000017266-portrait.png" alt="ss">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Admin Screenshots -->
+                <div class="screenshot-section">
+                    <h3><i class="fas fa-laptop"></i> Admin Panel</h3>
+                    <div class="screenshot-grid">
+                        <div class="screenshot-item fade-in-up">
+                            <img src="https://i.ibb.co/fdxMJ17F/image.png" alt="Admin Dashboard">
+                        </div>
+                        <div class="screenshot-item fade-in-up">
+                            <img src="https://i.ibb.co/zHxBVRxR/image.png" alt="Task Management">
+                        </div>
+                        <div class="screenshot-item fade-in-up">
+                            <img src="https://i.ibb.co/ksKNGYVN/image.png" alt="User Management">
+                        </div>
+                        <div class="screenshot-item fade-in-up">
+                            <img src="https://i.ibb.co/ymLBcSLv/image.png" alt="Withdrawal Management">
+                        </div>
+                        <div class="screenshot-item fade-in-up">
+                            <img src="https://i.ibb.co/Hfx99vLC/image.png" alt="Settings Panel">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Admin Features -->
+    <section class="admin-features">
+        <div class="container">
+            <h2 class="section-title">Professional Admin Panel</h2>
+            <p class="section-subtitle">
+                Complete control over your bot with enterprise-grade management tools
+            </p>
+            <div class="admin-grid">
+                <div class="admin-card fade-in-up">
+                    <h4><i class="fas fa-tasks"></i> Advanced Task Management</h4>
+                    <p>Create, edit, and remove tasks with custom rewards, participation limits, and branded icons. Tasks auto-remove when limits are reached.</p>
+                </div>
+                
+                <div class="admin-card fade-in-up">
+                    <h4><i class="fas fa-money-check-alt"></i> Withdrawal Control Center</h4>
+                    <p>Comprehensive withdrawal management with approve/reject functionality, payment tracking, and automated verification systems.</p>
+                </div>
+                
+                <div class="admin-card fade-in-up">
+                    <h4><i class="fas fa-users-cog"></i> User Management System</h4>
+                    <p>Complete user database with search, filter, delete, and detailed analytics. Monitor user activity and engagement patterns.</p>
+                </div>
+                
+                <div class="admin-card fade-in-up">
+                    <h4><i class="fas fa-shield-alt"></i> Security & Authentication</h4>
+                    <p>Multi-layer security with admin PIN validation, session management, and secure access controls for all administrative functions.</p>
+                </div>
+                
+                <div class="admin-card fade-in-up">
+                    <h4><i class="fas fa-chart-line"></i> Leaderboard Configuration</h4>
+                    <p>Configure bonus structures, manage competitions, reset referral counters, and distribute rewards with flexible scheduling options.</p>
+                </div>
+                
+                <div class="admin-card fade-in-up">
+                    <h4><i class="fas fa-credit-card"></i> Payment Gateway Setup</h4>
+                    <p>Add, remove, or modify payment methods with custom processing fees, minimum/maximum limits, and regional availability settings.</p>
+                </div>
+                
+                <div class="admin-card fade-in-up">
+                    <h4><i class="fas fa-cogs"></i> Global Settings Manager</h4>
+                    <p>Configure currency types, withdrawal thresholds, invitation requirements, and system-wide parameters from a centralized dashboard.</p>
+                </div>
+                
+                <div class="admin-card fade-in-up">
+                    <h4><i class="fas fa-gift"></i> Bonus Distribution System</h4>
+                    <p>Automated and manual bonus distribution with scheduled campaigns, targeted user segments, and comprehensive tracking analytics.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing Section -->
+    <section class="pricing" id="pricing">
+        <div class="container">
+            <div class="pricing-container">
+                <h2 class="section-title">Get Your Bot Today</h2>
+                <p class="section-subtitle">
+                    Complete solution with everything you need to start earning
+                </p>
+                
+                <div class="pricing-card fade-in-up">
+                    <div class="pricing-content">
+                        <div class="pricing-badge">
+                            <i class="fas fa-fire"></i> Limited Time Offer
+                        </div>
+                        <h3 class="pricing-title">Diamond Card Bot Script</h3>
+                        <p style="font-size: 1.2rem; margin-bottom: 2rem; opacity: 0.9;">
+                            Complete Telegram Mini App with Admin Panel
+                        </p>
+                        
+                        <ul class="pricing-features">
+                            <li><i class="fas fa-check-circle"></i> Complete Source Code</li>
+                            <li><i class="fas fa-check-circle"></i> Advanced Admin Panel</li>
+                            <li><i class="fas fa-check-circle"></i> FREE Installation & Setup</li>
+                            <li><i class="fas fa-check-circle"></i> 30 Days Premium Support</li>
+                            <li><i class="fas fa-check-circle"></i> Multiple Payment Gateways</li>
+                            <li><i class="fas fa-check-circle"></i> Customizable UI/UX</li>
+                            <li><i class="fas fa-check-circle"></i> Documentation & Guide</li>
+                            <li><i class="fas fa-check-circle"></i> Future Updates Included</li>
+                        </ul>
+                        
+                        <div class="contact-info">
+                            <h4><i class="fab fa-telegram"></i> Contact for Purchase</h4>
+                            <p style="font-size: 1.1rem; margin-bottom: 1rem;">
+                                Get instant pricing and discuss your requirements
+                            </p>
+                            <p style="font-size: 1rem; opacity: 0.8;">
+                                Telegram: <strong>@arijitiyan</strong>
+                            </p>
+                        </div>
+                        
+                        <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+                            <a href="https://t.me/arijitiyan" class="btn btn-primary" target="_blank" style="font-size: 1.1rem; padding: 15px 35px;">
+                                <i class="fab fa-telegram"></i> Contact Now
+                            </a>
+                            <a href="https://t.me/diamond_card_bot" class="btn btn-secondary" target="_blank">
+                                <i class="fas fa-eye"></i> View Demo
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="highlight-box" style="margin-top: 3rem;">
+                    <h3><i class="fas fa-rocket"></i> Ready to Launch?</h3>
+                    <p>Join successful bot owners who are generating passive income with our proven system. 
+                    Get started today with free setup and full support!</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <div class="logo" style="margin-bottom: 1rem;">
+                        <div class="diamond-icon" style="width: 35px; height: 35px;">
+                            <i class="fas fa-gem"></i>
+                        </div>
+                        Diamond Card
+                    </div>
+                    <p>Premium Telegram Mini App Script for entrepreneurs looking to build profitable bot businesses.</p>
+                </div>
+                
+                <div class="footer-section">
+                    <h4>Features</h4>
+                    <a href="#features">User Features</a><br>
+                    <a href="#admin">Admin Panel</a><br>
+                    <a href="#screenshots">Screenshots</a><br>
+                    <a href="#pricing">Pricing</a>
+                </div>
+                
+                <div class="footer-section">
+                    <h4>Support</h4>
+                    <p>Telegram: @arijitiyan</p>
+                    <p>Demo Bot: @diamond_card_bot</p>
+                    <p>Setup: Free Installation</p>
+                    <p>Support: 30 Days Included</p>
+                </div>
+                
+                <div class="footer-section">
+                    <h4>Quick Links</h4>
+                    <a href="https://t.me/diamond_card_bot" target="_blank">Try Demo</a><br>
+                    <a href="https://t.me/arijitiyan" target="_blank">Purchase Now</a><br>
+                    <a href="#features">View Features</a><br>
+                    <a href="#admin">Admin Panel</a>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; 2025 Diamond Card Bot Script. All rights reserved. | Built for success.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Header background change on scroll
+        window.addEventListener('scroll', function() {
+            const header = document.querySelector('.header');
+            if (window.scrollY > 100) {
+                header.style.background = 'rgba(10, 10, 10, 0.98)';
+                header.style.borderBottomColor = 'rgba(255, 107, 107, 0.3)';
+            } else {
+                header.style.background = 'rgba(10, 10, 10, 0.95)';
+                header.style.borderBottomColor = 'rgba(255, 255, 255, 0.1)';
+            }
+        });
+
+        // Intersection Observer for animations
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver(function(entries) {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, observerOptions);
+
+        // Observe all fade-in-up elements
+        document.querySelectorAll('.fade-in-up').forEach(el => {
+            observer.observe(el);
+        });
+
+        // Add click tracking for analytics (placeholder)
+        document.querySelectorAll('.btn').forEach(button => {
+            button.addEventListener('click', function() {
+                const action = this.textContent.trim();
+                console.log('Button clicked:', action);
+                // Add your analytics tracking code here
+            });
+        });
+
+        // Dynamic typing effect for hero subtitle
+        const subtitle = document.querySelector('.hero .subtitle');
+        const originalText = subtitle.innerHTML;
+        let index = 0;
+        
+        function typeWriter() {
+            if (index < originalText.length) {
+                subtitle.innerHTML = originalText.slice(0, index + 1);
+                index++;
+                setTimeout(typeWriter, 50);
+            }
+        }
+        
+        // Start typing effect after page load
+        setTimeout(typeWriter, 1000);
+
+        // Floating cards animation enhancement
+        document.querySelectorAll('.floating-card').forEach((card, index) => {
+            card.style.animationDelay = (index * 2) + 's';
+            card.style.animationDuration = (6 + index) + 's';
+        });
+
+        // Add hover effect to pricing card
+        const pricingCard = document.querySelector('.pricing-card');
+        pricingCard.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-10px) scale(1.02)';
+            this.style.boxShadow = '0 30px 60px rgba(255, 107, 107, 0.3)';
+        });
+        
+        pricingCard.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0) scale(1)';
+            this.style.boxShadow = 'none';
+        });
+    </script>
+</body>

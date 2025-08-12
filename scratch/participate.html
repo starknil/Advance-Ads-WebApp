@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <script src="https://telegram.org/js/telegram-web-app.js?57"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Giveaway Participation</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-color: #1a1a2e;
+            --card-bg: #16213e;
+            --primary-color: #00f5d4;
+            --secondary-color: #ff2d75;
+            --text-color: #e6e6e6;
+            --border-color: #2a3a5e;
+            --input-bg: #0f3460;
+            --success-color: #4caf50;
+            --error-color: #f44336;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            min-height: 100vh;
+            padding: 20px;
+            padding-top: 80px;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .header h1 {
+            color: var(--primary-color);
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 0.95rem;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--primary-color);
+        }
+
+        input, textarea, select {
+            width: 100%;
+            padding: 12px 15px;
+            background-color: var(--input-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-color);
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(0, 245, 212, 0.2);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .rules-btn {
+            background: none;
+            border: none;
+            color: var(--primary-color);
+            text-decoration: underline;
+            cursor: pointer;
+            font-size: 0.9rem;
+            margin: 15px 0;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .rules-btn i {
+            transition: transform 0.3s;
+        }
+
+        .rules-btn.active i {
+            transform: rotate(180deg);
+        }
+
+        .rules-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+            background-color: rgba(15, 52, 96, 0.3);
+            border-radius: 8px;
+            margin-top: 10px;
+        }
+
+        .rules-content.active {
+            max-height: 500px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .rules-content ul {
+            padding-left: 20px;
+        }
+
+        .rules-content li {
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+
+        .message {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .message.success {
+            background-color: rgba(76, 175, 80, 0.2);
+            border: 1px solid var(--success-color);
+            color: var(--success-color);
+            display: block;
+        }
+
+        .message.error {
+            background-color: rgba(244, 67, 54, 0.2);
+            border: 1px solid var(--error-color);
+            color: var(--error-color);
+            display: block;
+        }
+
+        @media (max-width: 480px) {
+            .card {
+                padding: 20px;
+            }
+            
+            .header h1 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="fas fa-trophy"></i> Giveaway Participation</h1>
+            <p>Create a video about our bot and submit the link to enter the contest</p>
+        </div>
+
+        <div class="message" id="responseMessage"></div>
+
+        <div class="card">
+            <form id="giveawayForm">
+                <div class="form-group">
+                    <label for="email"><i class="fas fa-envelope"></i> Email Address</label>
+                    <input type="email" id="email" name="email" required placeholder="Enter your email">
+                </div>
+
+                <div class="form-group">
+                    <label for="platform"><i class="fas fa-share-alt"></i> Platform</label>
+                    <select id="platform" name="platform" required>
+                        <option value="">Select platform</option>
+                        <option value="YouTube">YouTube</option>
+                        <option value="Telegram">Telegram</option>
+                        <option value="TikTok">TikTok</option>
+                        <option value="Instagram">Instagram</option>
+                        <option value="Facebook">Facebook</option>
+                        <option value="Twitter">Twitter</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="video_link"><i class="fas fa-video"></i> Video Link</label>
+                    <input type="url" id="video_link" name="video_link" required placeholder="Paste your video URL here">
+                </div>
+
+                <div class="form-group">
+                    <label for="message"><i class="fas fa-comment"></i> Message (Optional)</label>
+                    <textarea id="message" name="message" placeholder="Add any message about your video"></textarea>
+                </div>
+
+                <button type="button" class="rules-btn" id="rulesBtn">
+                    <i class="fas fa-chevron-down"></i> Contest Rules & Details
+                </button>
+
+                <div class="rules-content" id="rulesContent">
+                    <h4 style="margin-bottom: 10px; color: var(--primary-color);">Rules:</h4>
+                    <ul>
+                        <li>Video must be original (no copies allowed)</li>
+                        <li>Video must be about our bot</li>
+                        <li>Video must be public</li>
+                        <li>Must include our bot link in video description</li>
+                        <li>Fake views or impressions will result in a ban</li>
+                    </ul>
+
+                    <h4 style="margin: 15px 0 10px; color: var(--primary-color);">How we choose winners:</h4>
+                    <ul>
+                        <li>Video quality</li>
+                        <li>Views, likes, and comments count</li>
+                        <li>Overall impression</li>
+                    </ul>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Telegram WebApp initialization
+        const tg = window.Telegram.WebApp;
+tg.BackButton.show();
+tg.BackButton.onClick(() => {
+    tg.HapticFeedback.impactOccurred("medium");
+    window.location.href = 'index.html';
+   });
+        
+        // Expand the WebApp to full view
+        tg.expand();
+        
+        // Get user ID from Telegram
+        const userId = tg.initDataUnsafe.user?.id || 0;
+        
+        // Toggle rules visibility
+        const rulesBtn = document.getElementById('rulesBtn');
+        const rulesContent = document.getElementById('rulesContent');
+        
+        rulesBtn.addEventListener('click', () => {
+            rulesContent.classList.toggle('active');
+            rulesBtn.classList.toggle('active');
+        });
+        
+        // Form submission
+        const giveawayForm = document.getElementById('giveawayForm');
+        const responseMessage = document.getElementById('responseMessage');
+        
+        // Initialize Telegram Main Button
+        tg.MainButton.setText('SUBMIT ENTRY');
+        tg.MainButton.onClick(() => {
+            submitForm();
+        });
+        tg.MainButton.show();
+        tg.MainButton.disable();
+        
+        // Update main button state when form changes
+        const formInputs = giveawayForm.querySelectorAll('input, textarea, select');
+        formInputs.forEach(input => {
+            input.addEventListener('input', updateMainButtonState);
+        });
+        
+        function updateMainButtonState() {
+            const emailValid = document.getElementById('email').value.includes('@');
+            const platformValid = document.getElementById('platform').value !== '';
+            const videoValid = document.getElementById('video_link').value !== '';
+            
+            if (emailValid && platformValid && videoValid) {
+                tg.MainButton.enable();
+            } else {
+                tg.MainButton.disable();
+            }
+        }
+        
+        async function submitForm() {
+            tg.MainButton.showProgress();
+            
+            // Get form data
+            const formData = {
+                user_id: userId,
+                email: document.getElementById('email').value,
+                video_link: document.getElementById('video_link').value,
+                message: document.getElementById('message').value,
+                platform: document.getElementById('platform').value,
+                init_data: window.Telegram.WebApp.initData
+            };
+            
+            try {
+                const response = await fetch('api/video_submit.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+                
+                const result = await response.json();
+                
+                // Show response message
+                responseMessage.textContent = result.message;
+                responseMessage.className = 'message ' + (result.ok ? 'success' : 'error');
+                
+                if (result.ok) {
+                    // Clear form on success
+                    giveawayForm.reset();
+                    tg.MainButton.disable();
+                    tg.MainButton.hide();
+                }
+            } catch (error) {
+                responseMessage.textContent = 'Network error. Please try again.';
+                responseMessage.className = 'message error';
+                console.error('Error:', error);
+            } finally {
+                tg.MainButton.hideProgress();
+                
+                // Scroll to message
+                responseMessage.scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+    </script>
+</body>
+</html>

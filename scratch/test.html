@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Giveaway Notice Test</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            text-align: center;
+        }
+        .test-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        button {
+            background: #ff2d75;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 50px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-family: 'Poppins', sans-serif;
+            box-shadow: 0 4px 15px rgba(255, 45, 117, 0.5);
+        }
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(255, 45, 117, 0.7);
+        }
+        button.secondary {
+            background: #00f5d4;
+            box-shadow: 0 4px 15px rgba(0, 245, 212, 0.5);
+        }
+        button.secondary:hover {
+            box-shadow: 0 6px 20px rgba(0, 245, 212, 0.7);
+        }
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            color: #00f5d4;
+        }
+        p {
+            max-width: 600px;
+            opacity: 0.9;
+        }
+        .logo {
+            font-size: 2rem;
+            font-weight: 800;
+            margin-bottom: 30px;
+            color: #ff2d75;
+        }
+    </style>
+</head>
+<body>
+    <div class="logo">GIVEAWAY NOTICE TEST</div>
+    <h1>Test the Giveaway Notice Library</h1>
+    <p>Click the buttons below to test different variations of the giveaway notice popup.</p>
+    
+    <div class="test-buttons">
+        <button onclick="showDefault()">Default Notice</button>
+        <button onclick="showCustom()" class="secondary">Custom Notice</button>
+        <button onclick="showEnded()">Contest Ended</button>
+    </div>
+
+    <!-- Load the giveaway notice library from CDN -->
+    <script src="popup.js"></script>
+    
+    <script>
+        // Test functions
+        function showDefault() {
+            giveawayNotice.show({
+                action: function() {
+                    alert("You clicked the action button! (Default action)");
+                }
+            });
+        }
+
+        function showCustom() {
+            giveawayNotice.show({
+                title: "SPECIAL GIVEAWAY",
+                title_color: "#f9d71c",
+                background_color: "#0f3460",
+                description: "This is a custom styled giveaway notice with different colors and text! Don't miss your chance to win!",
+                description_color: "#ffffff",
+                action_btn: "PARTICIPATE",
+                btn_color: "#00f5d4",
+                close_btn_color: "#ff2d75",
+                action: function() {
+                    alert("Custom action triggered!");
+                }
+            });
+        }
+
+        function showEnded() {
+            // Temporarily override the end date to simulate contest ended state
+            const originalEndDate = giveawayNotice.defaults.end_date;
+            giveawayNotice.defaults.end_date = new Date().getDate() - 1; // Yesterday
+            
+            giveawayNotice.show({
+                title: "LAST MONTH'S GIVEAWAY",
+                description: "This should show the contest ended state",
+                action_btn: "THIS SHOULDN'T APPEAR",
+                action: function() {
+                    alert("This action shouldn't be triggered");
+                }
+            });
+            
+            // Restore original end date
+            setTimeout(() => {
+                giveawayNotice.defaults.end_date = originalEndDate;
+            }, 100);
+        }
+    </script>
+</body>
+</html>

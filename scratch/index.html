@@ -17,6 +17,8 @@
     <script src="popup.js"></script>
     <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
     <script src='//libtl.com/sdk.js' data-zone='9635675' data-sdk='show_9635675'></script>
+    <script type="text/javascript" src="https://cdn.tgads.space/assets/js/adexium-widget.min.js"></script>
+
     <style>
         :root {
             --bg-color: #121212;
@@ -536,12 +538,26 @@
     let currentInitData = null;
     const close_timer = 15; // Seconds after which close button appears
     // Ad provider configuration (set to true to enable, false to disable)
+
+    const adsMinimumTime = 10; // Minimum time in seconds to watch the ad
+
     const adProviders = {
-        giga1099: true,
+        giga1099: false,
         giga1390: false,
         mybid: false,
-        monetag: false
+        monetag: false,
+        adexium: true
     };
+
+    let adexiumWidget;
+
+    if (adProviders.adexium){
+        adexiumWidget = new AdexiumWidget({
+            wid: 'e8531f16-1667-45d7-b801-5d2b232640bc',
+            adFormat: 'interstitial',
+            debug: false
+        });
+    }
     // Cookie helper functions
     function setCookie(name, value, days) {
         const date = new Date();
@@ -671,12 +687,15 @@
             showError('Connection Error', 'Failed to load ads data. Please try again.');
         }
     }
+
     async function watchAd() {
         const button = document.getElementById('watch-ads-button');
         button.disabled = true;
         button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading Ad...';
+
         try {
             // Check if today's video ad has been watched
+            
             if (!isVideoWatchedToday()) {
                 const videoOverlay = document.getElementById('video-overlay');
                 const videoPlayer = document.getElementById('video-player');
@@ -733,7 +752,9 @@
                 };
             } else {
                 // Get enabled ad providers
+
                 const enabledProviders = Object.keys(adProviders).filter(provider => adProviders[provider]);
+
                 if (enabledProviders.length === 0) {
                     showError('Ad Error', 'No ad providers are enabled. Please enable at least one ad provider.');
                     fetchAdsData();
@@ -741,10 +762,16 @@
                     button.disabled = false;
                     return;
                 }
+
                 // Randomly select from enabled providers
                 const selectedProvider = enabledProviders[Math.floor(Math.random() * enabledProviders.length)];
                 let adShown = false;
+                let adsStartTime = 0;
+
                 try {
+
+                    adsStartTime = Date.now();
+
                     if (selectedProvider === 'giga1099' && window.showGiga) {
                         window.gigaAdId = '1099'; // Set ad ID for Giga 1099
                         await window.showGiga();
@@ -763,9 +790,31 @@
                             console.error('Monetag ad error:', e);
                             throw new Error('Monetag ad failed');
                         });
+                    } else if (selectedProvider === 'adexium' && adexiumWidget != undefined) {
+
+                        adexiumWidget.requestAd('interstitial');
+
+                        await new Promise((resolve, reject) => {
+                            adexiumWidget.on('adReceived', async (ad) => {
+                                adexiumWidget.displayAd(ad);
+                            });
+                            adexiumWidget.on('noAdFound', async () => {
+                                //showError('No AD Found', 'No Ad was found. Please try again.');
+                                window.gigaAdId = '1099'; // Set ad ID for Giga 1099
+                                await window.showGiga();
+                                adShown = true;
+                                resolve(false);
+                            })
+                            adexiumWidget.on('adClosed', () => {
+                                adShown = true;
+                                resolve(true);
+                            });
+                        });
+
                     } else {
                         throw new Error(`${selectedProvider} not initialized`);
                     }
+
                 } catch (error) {
                     console.error(`Error showing ${selectedProvider} ad:`, error);
                     showError('Ad Error', `Failed to show ${selectedProvider} ad. Please try again.`);
@@ -774,8 +823,27 @@
                     button.disabled = false;
                     return;
                 }
-                // Only proceed with reward if ad was shown
+
+                const watchedTime = Math.round((Date.now() - adsStartTime) / 1000);
+
+
                 if (adShown) {
+
+                if (watchedTime < adsMinimumTime) {
+                    const remainingTime = adsMinimumTime - watchedTime;
+                    Swal.fire({
+                        icon: 'info',
+                        title: 'Ad Incomplete',
+                        text: `😰 Sorry, Ads seconds was too low. Minimum required is ${adsMinimumTime} seconds!`,
+                        confirmButtonColor: 'var(--primary-color)',
+                        background: 'var(--bg-color)',
+                        color: 'var(--text-color)'
+                    });
+                    button.innerHTML = '<i class="fas fa-ad"></i> Watch Ad Now';
+                    button.disabled = false;
+                    return;
+                }
+
                     const response = await fetch('api/watch-ad.php', {
                         method: 'POST',
                         headers: {
@@ -783,7 +851,7 @@
                         },
                         body: JSON.stringify({
                             user_id: currentUserId,
-                            ad_provider: selectedProvider // Include provider info for server-side validation
+                            ad_provider: selectedProvider
                         })
                     });
                     const data = await response.json();
@@ -807,12 +875,15 @@
             }
         } catch (error) {
             console.error('Error watching ad:', error);
+            //alert(error)
             showError('Ad Error', 'Failed to show ad. Please try again.');
             fetchAdsData();
             button.innerHTML = '<i class="fas fa-ad"></i> Watch Ad Now';
             button.disabled = false;
         }
     }
+    
+    
     function renderTasks(tasks) {
         const tasksSection = document.getElementById('tasks-section');
         tasksSection.innerHTML = '';
